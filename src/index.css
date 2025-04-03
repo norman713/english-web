@@ -1,2 +1,26 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap');
 
+.nav-link {
+  color: #71869D;
+  font-family: 'Inter', sans-serif;
+  font-weight: bold;
+  font-size: 20px;
+  transition: color 0.3s;
+}
+.text{
+    font-family: 'Inter', sans-serif;   
+    font-weight: bold;
+}
+.banner-text{
+    font-family: "Allura", cursive;
+
+    font-style: normal;
+   
+}
+.nav-link:hover {
+  color: #D09838;
+}
+.nav-link:active {
+    color: #D09838; 
+}
