@@ -1,6 +1,7 @@
 import { ChevronDown } from "lucide-react";
 import logo from "../../assets/logo-removebg-preview (1).png";
 import { useState } from "react";
+import { Link, useLocation } from "react-router-dom"; // Import Link và useLocation từ react-router-dom
 
 interface NavbarProps {
   activeTab: string;
@@ -8,12 +9,15 @@ interface NavbarProps {
 }
 
 const Navbar = ({ activeTab, userType }: NavbarProps) => {
+  const location = useLocation(); // Lấy thông tin đường dẫn hiện tại
   const isLoggedIn = userType !== "guest";
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   // Helper function to determine the color of the link
   const getNavLinkColor = (tab: string) =>
-    activeTab === tab ? "text-[#D09838] font-semibold" : "text-[#71869D]";
+    location.pathname.includes(tab)
+      ? "text-[#D09838] font-semibold"
+      : "text-[#71869D]";
 
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
@@ -43,61 +47,70 @@ const Navbar = ({ activeTab, userType }: NavbarProps) => {
         <div className="flex space-x-[50px]">
           {userType === "guest" && (
             <>
-              <a href="/" className={`nav-link ${getNavLinkColor("home")}`}>
+              <Link to="/" className={`nav-link ${getNavLinkColor("home")}`}>
                 Home
-              </a>
-              <a
-                href="/vocab"
+              </Link>
+              <Link
+                to="/vocab"
                 className={`nav-link ${getNavLinkColor("vocab")}`}
               >
                 Vocabulary
-              </a>
-              <a href="/test" className={`nav-link ${getNavLinkColor("test")}`}>
+              </Link>
+              <Link
+                to="/test"
+                className={`nav-link ${getNavLinkColor("test")}`}
+              >
                 Test
-              </a>
-              <a href="/login" className="nav-link text-[#71869D]">
+              </Link>
+              <Link to="/login" className="nav-link text-[#71869D]">
                 Login
-              </a>
+              </Link>
             </>
           )}
 
           {userType === "user" && (
             <>
-              <a
-                href="/vocab"
+              <Link
+                to="/user"
                 className={`nav-link ${getNavLinkColor("vocab")}`}
               >
                 Vocabulary
-              </a>
-              <a href="/test" className={`nav-link ${getNavLinkColor("test")}`}>
+              </Link>
+              <Link
+                to="/user/test"
+                className={`nav-link ${getNavLinkColor("test")}`}
+              >
                 Test
-              </a>
-              <a
-                href="/admin/statistic"
+              </Link>
+              <Link
+                to="/admin/statistic"
                 className={`nav-link ${getNavLinkColor("statistic")}`}
               >
                 Statistic
-              </a>
+              </Link>
             </>
           )}
 
           {userType === "admin" && (
             <>
-              <a
-                href="/admin/statistic"
+              <Link
+                to="/admin/statistic"
                 className={`nav-link ${getNavLinkColor("statistic")}`}
               >
                 Statistic
-              </a>
-              <a
-                href="/vocab"
+              </Link>
+              <Link
+                to="/vocab"
                 className={`nav-link ${getNavLinkColor("vocab")}`}
               >
                 Vocabulary
-              </a>
-              <a href="/test" className={`nav-link ${getNavLinkColor("test")}`}>
+              </Link>
+              <Link
+                to="/user/test"
+                className={`nav-link ${getNavLinkColor("test")}`}
+              >
                 Test
-              </a>
+              </Link>
             </>
           )}
         </div>
@@ -126,26 +139,26 @@ const Navbar = ({ activeTab, userType }: NavbarProps) => {
                 </button>
                 {dropdownOpen && (
                   <div className="absolute right-0 mt-7 w-[150px] bg-white border border-[#959595] shadow-lg nav-link rounded-sm">
-                    <a
-                      href="/profile"
+                    <Link
+                      to="/profile"
                       className="block px-4 py-2 text-sm text-[#71869D] hover:bg-gray-100"
                     >
                       Profile
-                    </a>
-                    <a
-                      href="/logout"
+                    </Link>
+                    <Link
+                      to="/logout"
                       className="block px-4 py-2 text-sm text-[#71869D] hover:bg-gray-100"
                     >
                       Logout
-                    </a>
+                    </Link>
                   </div>
                 )}
               </div>
             </div>
           ) : (
-            <a href="/login" className="nav-link text-[#71869D]">
+            <Link to="/login" className="nav-link text-[#71869D]">
               Login
-            </a>
+            </Link>
           )}
         </div>
       </div>
