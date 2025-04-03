@@ -22,22 +22,64 @@ const Navbar = ({ activeTab, userType }: NavbarProps) => {
 
         {/* Navigation Links */}
         <div className="flex space-x-[50px]">
-          <a href="/" className={`nav-link ${getNavLinkColor("home")}`}>
-            Home
-          </a>
-          <a href="/vocab" className={`nav-link ${getNavLinkColor("vocab")}`}>
-            Vocabulary
-          </a>
-          <a href="/test" className={`nav-link ${getNavLinkColor("test")}`}>
-            Test
-          </a>
+          {userType === "guest" && (
+            <>
+              <a href="/" className={`nav-link ${getNavLinkColor("home")}`}>
+                Home
+              </a>
+              <a
+                href="/vocab"
+                className={`nav-link ${getNavLinkColor("vocab")}`}
+              >
+                Vocabulary
+              </a>
+              <a href="/test" className={`nav-link ${getNavLinkColor("test")}`}>
+                Test
+              </a>
+              <a href="/login" className="nav-link text-[#71869D]">
+                Login
+              </a>
+            </>
+          )}
+
+          {userType === "user" && (
+            <>
+              <a
+                href="/vocab"
+                className={`nav-link ${getNavLinkColor("vocab")}`}
+              >
+                Vocabulary
+              </a>
+              <a href="/test" className={`nav-link ${getNavLinkColor("test")}`}>
+                Test
+              </a>
+              <a
+                href="/admin/statistic"
+                className={`nav-link ${getNavLinkColor("statistic")}`}
+              >
+                Statistic
+              </a>
+            </>
+          )}
+
           {userType === "admin" && (
-            <a
-              href="/admin/statistic"
-              className={`nav-link ${getNavLinkColor("statistic")}`}
-            >
-              Statistic
-            </a>
+            <>
+              <a
+                href="/admin/statistic"
+                className={`nav-link ${getNavLinkColor("statistic")}`}
+              >
+                Statistic
+              </a>
+              <a
+                href="/vocab"
+                className={`nav-link ${getNavLinkColor("vocab")}`}
+              >
+                Vocabulary
+              </a>
+              <a href="/test" className={`nav-link ${getNavLinkColor("test")}`}>
+                Test
+              </a>
+            </>
           )}
         </div>
 

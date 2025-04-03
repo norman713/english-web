@@ -1,4 +1,3 @@
-// index.tsx
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -12,8 +11,10 @@ createRoot(document.getElementById("root")!).render(
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/user" element={<User />} />
-        <Route path="/user/vocab" element={<VocabularyPage />} />
+        <Route path="/user" element={<User />}>
+          <Route index element={<Home />} />
+          <Route path="vocab" element={<VocabularyPage />} />
+        </Route>
       </Routes>
     </Router>
   </StrictMode>

@@ -10,12 +10,18 @@ import {
   MessageSquareMore,
   Pin,
 } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 const Home = () => {
+  // Determine if this component is rendered directly (/) or inside User (/user)
+  const location = useLocation();
+  const isDirectAccess = location.pathname === "/";
+
   return (
-    <div className="min-h-screen flex flex-col text-gray-900">
-      {/* Navbar */}
-      <Navbar activeTab={"home"} userType={"guest"} />
+    <div className="flex flex-col">
+      {/* Navbar should only render when directly accessed */}
+      {isDirectAccess && <Navbar activeTab={"home"} userType={"guest"} />}
+
       {/* Banner */}
       <header
         className="relative grid grid-cols-3 items-center text-center"
@@ -29,7 +35,7 @@ const Home = () => {
           />
         </div>
         <div>
-          <h1 className="text-4xl banner-text  text-[#2D89FF]">
+          <h1 className="text-4xl banner-text text-[#2D89FF]">
             ✨ LEARNING ENGLISH ✨
           </h1>
           <p className="text-xl banner-text text-[#FFB400] mt-2 font-bold">
