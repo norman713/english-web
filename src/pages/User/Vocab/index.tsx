@@ -1,4 +1,6 @@
 import { useState } from "react";
+import Tab from "../../../components/Tab";
+import StatusTab from "../../../components/StatusTab";
 
 const VocabularyPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,30 +29,27 @@ const VocabularyPage = () => {
 
   return (
     <div className="vocab-container">
-      {/* Navbar */}
-      <nav className="bg-blue-500 p-4 flex justify-between items-center text-white">
-        <div className="flex space-x-6">
-          <button className="tab-button">Danh sách từ của tôi</button>
-          <button className="tab-button">Đang học</button>
-          <button className="tab-button">Khám phá</button>
-        </div>
-        <button className="logout-button">Logout</button>
-      </nav>
+      {/* Tabs */}
+      <div className="bg-[rgba(169,201,227,0.23)] px-[14px] py-[31px] flex flex-col gap-[29px]">
+        <text className="banner-text text-[60px] font-semibold">Flashcard</text>
+
+        <nav className="  flex justify-between items-center">
+          <div>
+            <Tab labels={["List từ của tôi", "Đang học", "Khám phá"]} />
+          </div>
+        </nav>
+      </div>
 
       {/* Trạng thái */}
-      <div className="status-container p-4 flex justify-between">
-        <div className="status-box bg-blue-200 p-4 text-center rounded">
-          <span className="status-title">10</span>
-          <div>đã học</div>
-        </div>
-        <div className="status-box bg-green-200 p-4 text-center rounded">
-          <span className="status-title">5</span>
-          <div>đã nhớ</div>
-        </div>
-        <div className="status-box bg-red-200 p-4 text-center rounded">
-          <span className="status-title">5</span>
-          <div>chưa học</div>
-        </div>
+      <div className="flex justify-center items-center space-x-[70px] py-[30px]">
+        <StatusTab number={10} text="đã học" backgroundColor="bg-[#F3F7FF]" />
+        <StatusTab number={5} text="đã nhớ" backgroundColor="bg-[#E6F7E6]" />
+        <StatusTab
+          number={5}
+          text="chưa học"
+          backgroundColor="bg-[#FFE6E6]"
+          numberColor="text-[#FA1616]"
+        />
       </div>
 
       {/* Tìm kiếm */}
