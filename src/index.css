@@ -1,5 +1,6 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap');
+@import "tailwindcss";
+
 
 .nav-link {
   color: #71869D;
@@ -14,7 +15,6 @@
 }
 .banner-text{
     font-family: "Allura", cursive;
-
     font-style: normal;
    
 }

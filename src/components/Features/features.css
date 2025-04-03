@@ -1,0 +1,9 @@
+.feature-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .feature-card:hover {
+    transform: translateY(-10px); /* Lifts the card */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow for the lifted effect */
+  }
+  

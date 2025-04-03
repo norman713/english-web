@@ -1,8 +1,17 @@
 // home list
-import logo from "../../assets/user.png";
 import bannerImage from "../../assets/hero.png";
 import Navbar from "../../components/NavBar/NavBar";
 import Button from "../../components/Button/Button";
+import FeatureCard from "../../components/Features";
+import {
+  BookOpenCheck,
+  ChartNoAxesColumnIncreasing,
+  FileText,
+  Info,
+  MessageSquareMore,
+  Pin,
+} from "lucide-react";
+
 const Home = () => {
   return (
     <div className="min-h-screen flex flex-col text-gray-900">
@@ -17,12 +26,14 @@ const Home = () => {
           <img
             src={bannerImage}
             alt="Banner"
-            className="w-full h-full object-cover transform scale-x-100" // scale-x-110 để phóng to chiều ngang
+            className="w-full h-full object-cover transform scale-x-100"
           />
         </div>
         <div>
-          <h1 className="text-4xl banner-text">✨ LEARNING ENGLISH ✨</h1>
-          <p className="text-xl banner-text text-gray-600 mt-2 font-bold">
+          <h1 className="text-4xl banner-text  text-[#2D89FF]">
+            ✨ LEARNING ENGLISH ✨
+          </h1>
+          <p className="text-xl banner-text text-[#FFB400] mt-2 font-bold">
             ⭐ Easy and effective⭐
           </p>
         </div>
@@ -32,59 +43,59 @@ const Home = () => {
       </header>
 
       {/* Features */}
-      <section className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 px-6 py-8">
-        {[
-          {
-            title: "Smart Flashcard",
-            desc: "Dễ dàng ôn luyện từ vựng với hệ thống thẻ thông minh.",
-          },
-          {
-            title: "Exam Preparation",
-            desc: "Luyện tập và kiểm tra với các đề thi mô phỏng thực tế.",
-          },
-          {
-            title: "Learning Tracking",
-            desc: "Theo dõi tiến trình học tập và đánh giá kết quả.",
-          },
-          {
-            title: "Personalized Learning",
-            desc: "Lộ trình học cá nhân hóa theo cấp độ của bạn.",
-          },
-          {
-            title: "Exam Discussion",
-            desc: "Thảo luận và chia sẻ kinh nghiệm về các kỳ thi.",
-          },
-        ].map((feature, index) => (
-          <div
-            key={index}
-            className="bg-white p-4 rounded-lg shadow-md text-center"
-          >
-            <h2 className="text-lg font-semibold">{feature.title}</h2>
-            <p className="text-sm text-gray-600 mt-2">{feature.desc}</p>
-          </div>
-        ))}
+      <section className="py-16 px-8 grid grid-cols-1 md:grid-cols-5 gap-6">
+        <FeatureCard
+          icon={FileText}
+          title="Smart Flashcard"
+          content="Ôn tập từ vựng hiệu quả với hệ thống flashcards thông minh giúp ghi nhớ lâu hơn."
+          bgColor="bg-[#F3F7FF]"
+        />
+        <FeatureCard
+          icon={BookOpenCheck}
+          title="Exam Preparation System"
+          content="Làm bài kiểm tra với nhiều cấp độ, kiểm tra trình độ qua hệ thống đề thi."
+          bgColor="bg-[#FFF3E6]"
+        />
+        <FeatureCard
+          icon={ChartNoAxesColumnIncreasing}
+          title="Learning Progress Tracking"
+          content="Theo dõi tiến trình học qua biểu đồ thông kê rõ ràng, cải thiện chiến lược ôn tập."
+          bgColor="bg-[#E6F7E6]"
+        />
+        <FeatureCard
+          icon={Pin}
+          title="Personalized Learning Path"
+          content="Xem tiến trình học cá nhân, từ vựng đã học, bài test đã hoàn thành."
+          bgColor="bg-[#F7E6FF]"
+        />
+        <FeatureCard
+          icon={MessageSquareMore}
+          title="Exam Discussion & Comments"
+          content="Thảo luận cùng cộng đồng, đặt câu hỏi và giải đáp thắc mắc về bài thi."
+          bgColor="bg-[#FFE6E6]"
+        />
       </section>
 
       {/* Footer */}
       <footer className="bg-gray-100 py-6 px-8 mt-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-gray-700">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-[#2F2F68]">
           <div>
-            <img src={logo} alt="Logo" className="w-16 mb-2" />
+            <Info size={60} />
           </div>
           <div>
-            <h3 className="font-semibold">Pages</h3>
+            <h4 className="font-bold text-[20px]">Pages</h4>
             <p>Home</p>
             <p>About Us</p>
             <p>Contact</p>
           </div>
           <div>
-            <h3 className="font-semibold">Resources</h3>
+            <h3 className="font-bold text-[20px]">Resources</h3>
             <p>Flashcards</p>
             <p>Exam Bank</p>
             <p>Statistics</p>
           </div>
           <div>
-            <h3 className="font-semibold">Contact</h3>
+            <h3 className="font-bold text-[20px]">Contact</h3>
             <p>📍 123 Main Street, Hanoi, Vietnam</p>
             <p>📧 support@englishweb.com</p>
             <p>📞 +84 911 520 235</p>
