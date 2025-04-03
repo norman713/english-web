@@ -1,4 +1,3 @@
-// home list
 import bannerImage from "../../assets/hero.png";
 import Navbar from "../../components/NavBar/NavBar";
 import Button from "../../components/Button/Button";
@@ -16,7 +15,7 @@ const Home = () => {
   return (
     <div className="min-h-screen flex flex-col text-gray-900">
       {/* Navbar */}
-      <Navbar />
+      <Navbar activeTab={"home"} userType={"guest"} />
       {/* Banner */}
       <header
         className="relative grid grid-cols-3 items-center text-center"
