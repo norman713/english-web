@@ -1,20 +1,14 @@
 import { useState } from "react";
-const MyList = () => {
+const Explore = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Dữ liệu demo cho các từ vựng
   const vocabList = [
     {
-      title: "Từ vựng chủ đề giao tiếp hàng ngày",
-      wordsCount: 200,
-      status: "Đã hoàn thành",
-      progress: "5",
-    },
-    {
-      title: "Từ vựng chủ đề công nghệ",
-      wordsCount: 150,
-      status: "Đang học",
-      progress: "10",
+      title: "Từ vựng chủ đề du lịch",
+      wordsCount: 100,
+      status: "Chưa học",
+      progress: "0",
     },
     {
       title: "Từ vựng chủ đề du lịch",
@@ -22,16 +16,16 @@ const MyList = () => {
       status: "Chưa học",
       progress: "0",
     },
- 
   ];
 
   return (
     <div className="vocab-container">
+
       {/* Vocab Tab */}
       <div className="vocab-tab bg-[rgba(169,201,227,0.23)]">
         {/* Top Vocab */}
         <div className="top-vocab p-4 flex items-center justify-between">
-          <h2 className="text-3xl font-bold text-blue-900">List từ của tôi</h2>
+          <h2 className="text-3xl font-bold text-blue-900">Khám phá</h2>
           <div className="search-container flex items-center border border-blue-300 rounded px-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -58,33 +52,33 @@ const MyList = () => {
         </div>
 
         {/* Vocab List */}
-<div className="vocab-list p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mx-10">
-  {vocabList
-    .filter((vocab) =>
-      vocab.title.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .map((vocab, index) => (
-      <div key={index} className="vocab-item p-4 rounded bg-[rgba(99,176,239,0.23)]">
-        <h3 className="vocab-title font-bold text-2xl">{vocab.title}</h3>
-        <p className="text-[20px] font-bold text-[rgba(0,0,0,0.50)]">
-          Số lượng từ: {vocab.wordsCount}
-        </p>
-        <p className="text-[20px] font-bold text-[rgba(0,0,0,0.50)]">
-          Trạng thái: {vocab.status}
-        </p>
-        <div className="vocab-progress">
-          <span className="text-[20px] font-bold text-[rgba(0,0,0,0.50)]">
-            Đã học: {vocab.progress} từ
-          </span>
+        <div className="vocab-list p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mx-10">
+          {vocabList
+            .filter((vocab) =>
+              vocab.title.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+            .map((vocab, index) => (
+              <div key={index} className="vocab-item p-4 rounded bg-[rgba(99,176,239,0.23)]">
+                <h3 className="vocab-title font-bold text-2xl">{vocab.title}</h3>
+                <p className="text-[20px] font-bold text-[rgba(0,0,0,0.50)]">
+                     Số lượng từ: {vocab.wordsCount}
+                </p>
+                <p className="text-[20px] font-bold text-[rgba(0,0,0,0.50)]">
+                    Trạng thái: {vocab.status}
+                </p>
+                <div className="vocab-progress">
+                <span className="text-[20px] font-bold text-[rgba(0,0,0,0.50)]">
+                    Đã học: {vocab.progress} từ
+                </span>
+                </div>
+                <div className="vocab-buttons flex space-x-2 mt-4">
+                  <button className="start-button bg-white text-blue-500 rounded flex justify-center items-end gap-10 p-2 w-full">
+                    Bắt đầu
+                  </button>
+                </div>
+              </div>
+            ))}
         </div>
-        <div className="vocab-buttons flex space-x-2 mt-4">
-          <button className="start-button bg-white text-blue-500 rounded flex justify-center items-end gap-10 p-2 w-full">
-            Bắt đầu
-          </button>
-        </div>
-      </div>
-    ))}
-</div>
 
         {/* Pagination */}
         <div className="pagination p-4 text-center">
@@ -98,4 +92,4 @@ const MyList = () => {
     );
 };
 
-export default MyList;
+export default Explore;

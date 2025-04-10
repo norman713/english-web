@@ -1,27 +1,17 @@
 import { useState } from "react";
-const MyList = () => {
+const Learning = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Dữ liệu demo cho các từ vựng
   const vocabList = [
-    {
-      title: "Từ vựng chủ đề giao tiếp hàng ngày",
-      wordsCount: 200,
-      status: "Đã hoàn thành",
-      progress: "5",
-    },
+
     {
       title: "Từ vựng chủ đề công nghệ",
       wordsCount: 150,
       status: "Đang học",
       progress: "10",
     },
-    {
-      title: "Từ vựng chủ đề du lịch",
-      wordsCount: 100,
-      status: "Chưa học",
-      progress: "0",
-    },
+
  
   ];
 
@@ -31,7 +21,7 @@ const MyList = () => {
       <div className="vocab-tab bg-[rgba(169,201,227,0.23)]">
         {/* Top Vocab */}
         <div className="top-vocab p-4 flex items-center justify-between">
-          <h2 className="text-3xl font-bold text-blue-900">List từ của tôi</h2>
+          <h2 className="text-3xl font-bold text-blue-900">List từ đang học</h2>
           <div className="search-container flex items-center border border-blue-300 rounded px-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -98,4 +88,4 @@ const MyList = () => {
     );
 };
 
-export default MyList;
+export default Learning;
