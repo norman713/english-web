@@ -6,9 +6,11 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+
 import "./index.css";
 import Home from "./pages/Home";
-import User from "./pages/User";
+import User from "./pages/User"; // layout
+import VocabLayout from "./pages/User/Vocab";
 import MyList from "./pages/User/Vocab/MyList";
 import Learning from "./pages/User/Vocab/Learning";
 import Explore from "./pages/User/Vocab/Explore";
@@ -19,15 +21,19 @@ createRoot(document.getElementById("root")!).render(
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        
+
+        {/* Layout có Navbar */}
         <Route path="/user" element={<User />}>
-          {/* Redirect mặc định về /user/vocab/my-list */}
           <Route index element={<Navigate to="vocab/my-list" />} />
+          
+          {/* Layout riêng cho vocab */}
+          <Route path="vocab" element={<VocabLayout />}>
+            <Route path="my-list" element={<MyList />} />
+            <Route path="learning" element={<Learning />} />
+            <Route path="explore" element={<Explore />} />
+          </Route>
 
-          <Route path="vocab/my-list" element={<MyList />} />
-          <Route path="vocab/learning" element={<Learning />} />
-          <Route path="vocab/explore" element={<Explore />} />
-
+          {/* Trang test */}
           <Route path="test" element={<TestPage />} />
         </Route>
       </Routes>
