@@ -36,7 +36,7 @@ const Navbar = ({ activeTab, userType }: NavbarProps) => {
   };
 
   return (
-    <nav className="bg-white px-[20px] shadow-2xs border border-[#959595]">
+    <nav className="bg-white px-[20px] shadow-xl border-0 border-[#959595]">
       <div className="container flex justify-between items-center">
         <div>
           {/* Logo */}
@@ -93,23 +93,24 @@ const Navbar = ({ activeTab, userType }: NavbarProps) => {
 
           {userType === "admin" && (
             <>
+              
               <Link
-                to="/admin/statistic"
-                className={`nav-link ${getNavLinkColor("statistic")}`}
-              >
-                Statistic
-              </Link>
-              <Link
-                to="/vocab"
+                to="/admin"
                 className={`nav-link ${getNavLinkColor("vocab")}`}
               >
                 Vocabulary
               </Link>
               <Link
-                to="/user/test"
+                to="/admin/test"
                 className={`nav-link ${getNavLinkColor("test")}`}
               >
                 Test
+              </Link>
+              <Link
+                to="/admin/statistic"
+                className={`nav-link ${getNavLinkColor("statistic")}`}
+              >
+                Statistic
               </Link>
             </>
           )}

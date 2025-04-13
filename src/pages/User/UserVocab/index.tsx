@@ -1,7 +1,6 @@
 import { Outlet } from "react-router-dom";
 import StatusTab from "../../../components/StatusTab";
 import Tab from "../../../components/Tab";
-
 const VocabLayout = () => {
   return (
     <div className="min-h-screen flex flex-col">
@@ -25,7 +24,7 @@ const VocabLayout = () => {
           <div>
             <Tab
               labels={["List từ của tôi", "Đang học", "Khám phá"]}
-              paths={["/user/vocab/my-list", "/user/vocab/learning", "/user/vocab/explore"]}
+              paths={["/user/user-vocab/my-list", "/user/user-vocab/learning", "/user/user-vocab/explore"]}
             />
           </div>
         </nav>
