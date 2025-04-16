@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import VocabSetCard from "../../../../components/VocabSetCard";
 import { MagnifyingGlass } from "@phosphor-icons/react";
+import StatusTab from "../../../../components/StatusTab";
 
 interface VocabularySet {
   id?: string | undefined;
@@ -41,13 +42,24 @@ const MyList = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Trạng thái */}
+      <div className="flex justify-center items-center gap-[70px] py-[30px]">
+        <StatusTab number={20} text="đã học" backgroundColor="bg-[#F3F7FF]" />
+        <StatusTab number={5} text="đã nhớ" backgroundColor="bg-[#E6F7E6]" />
+        <StatusTab
+          number={3}
+          text="chưa học"
+          backgroundColor="bg-[#FFE6E6]"
+          numberColor="text-[#FA1616]"
+        />
+      </div>
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         {/* Header Section */}
         <div className="p-6 bg-gradient-to-r from-blue-50 to-cyan-50 border-b">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">
-                My Vocabulary Sets
+              <h1 className="text-2xl font-bold text-[#2754A7]">
+                List từ của tôi
               </h1>
               <p className="text-gray-600">
                 Manage your vocabulary collections

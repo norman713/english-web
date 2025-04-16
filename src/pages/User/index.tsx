@@ -6,7 +6,7 @@ const User = () => {
       {/* Navbar is placed here once and will be present for all child routes */}
       <Navbar activeTab={"vocab"} userType={"user"} />
       {/* Đây là chỗ render các trang con */}
-      <div className="p-4">
+      <div>
         <Outlet />
       </div>
     </div>

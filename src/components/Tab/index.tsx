@@ -25,7 +25,7 @@ const Tab = ({ labels, paths }: TabProps) => {
               isActive
                 ? "bg-[#B9EEFD] text-[#289AC0]"
                 : "bg-white text-[#289AC0]"
-            } from-inter-500 text-[25px] font-normal`
+            } from-inter-500 text-[22px] font-normal`
           }
           onClick={() => handleTabClick(index)}
         >
