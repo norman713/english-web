@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+
 import VocabSetCard from "../../../../components/VocabSetCard";
-import { getVocabularySets, VocabularySet } from "../../../../services/vocabularyService";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -8,30 +8,8 @@ const ListPage = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [vocabList, setVocabList] = useState<VocabularySet[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const { data, totalPages } = await getVocabularySets(1 , 10); // Note: page-1 for 0-based index
-        setVocabList(data || []);
-        setTotalPages(totalPages || 1);
-      } catch (error) {
-        console.error("Error fetching vocabulary sets:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [currentPage]);
-
-  const filteredVocabList = vocabList.filter((vocab) =>
-    vocab.name?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   const handleAddNew = () => {
     navigate("/admin/admin-vocab/add-page"); // Update this path according to your routing
@@ -53,7 +31,7 @@ const ListPage = () => {
               <span>Thêm mới</span>
             </button>
           </div>
-          
+
           <div className="search-container flex items-center border-2 border-blue-300 rounded px-2 bg-white">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -83,21 +61,9 @@ const ListPage = () => {
         </div>
 
         {/* Kết quả tìm kiếm */}
-        <div className="text-blue-900 px-4 font-semibold">
-          {isLoading ? (
-            "Đang tải dữ liệu..."
-          ) : filteredVocabList.length > 0 ? (
-            <>
-              {filteredVocabList.length} kết quả{" "}
-              {searchQuery && `cho từ khóa "${searchQuery}"`}
-            </>
-          ) : (
-            <>Không tìm thấy kết quả nào {searchQuery && `cho "${searchQuery}"`}</>
-          )}
-        </div>
 
         {/* Danh sách từ vựng */}
-        <div className="vocab-list p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mx-10">
+        {/* <div className="vocab-list p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mx-10">
           {isLoading ? (
             [...Array(4)].map((_, index) => (
               <div key={index} className="h-48 bg-gray-200 rounded-lg animate-pulse"></div>
@@ -115,7 +81,7 @@ const ListPage = () => {
               Không tìm thấy danh sách từ vựng nào.
             </p>
           )}
-        </div>
+        </div> */}
 
         {/* Phân trang */}
         {totalPages > 1 && !isLoading && (

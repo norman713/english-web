@@ -1,6 +1,7 @@
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import VocabSetCard from "../../../../components/VocabSetCard";
+import setApi from "../../../../api/setApi";
+
 const Explore = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -8,10 +9,9 @@ const Explore = () => {
 
   const vocabList = [
     {
-      id:'1',
+      id: "1",
       title: "Từ vựng chủ đề giao tiếp hàng ngày",
       wordsCount: 200,
-
     },
     {
       title: "Từ vựng chủ đề công nghệ",
@@ -20,26 +20,20 @@ const Explore = () => {
     {
       title: "Từ vựng chủ đề du lịch",
       wordsCount: 100,
-
     },
     {
       title: "Từ vựng chủ đề ẩm thực",
       wordsCount: 120,
-
     },
     {
       title: "Từ vựng chủ đề y tế",
       wordsCount: 90,
-
     },
     {
       title: "Từ vựng chủ đề kinh tế",
       wordsCount: 2,
-
     },
   ];
-
-  
 
   const filteredVocabList = vocabList.filter((vocab) =>
     vocab.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -55,6 +49,14 @@ const Explore = () => {
   const handlePageClick = (page: number) => {
     setCurrentPage(page);
   };
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await setApi.getAll(1);
+      console.log("Data: ", res);
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div className="vocab-container">
@@ -88,7 +90,6 @@ const Explore = () => {
             />
           </div>
         </div>
-
 
         <div className="vocab-list p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mx-10">
           {paginatedList.length > 0 ? (
