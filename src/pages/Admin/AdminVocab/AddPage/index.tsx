@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { X, Plus, Volume2, Edit3 } from "lucide-react";
+import { X, Plus, Edit3 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import setApi from "../../../../api/setApi"; // Thay bằng đường dẫn đúng của bạn
+import axios from "axios";
 
 interface VocabularyCard {
   id: string;
@@ -51,7 +53,6 @@ const AddPage = () => {
   };
 
   const handleSubmit = async () => {
-    // Validate inputs
     if (!setName.trim()) {
       toast.error("Vui lòng nhập tên bộ từ");
       return;
@@ -63,13 +64,27 @@ const AddPage = () => {
     }
 
     try {
-      const userId = uuidv4(); // Tạm thời tạo userId ngẫu nhiên
+      const payload: import("../../../../api/setApi").CreateSetRequest = {
+        name: setName,
+        words: cards.map((card) => ({
+          word: card.word,
+          pronunciation: card.pronunciation || "",
+          translation: card.translation,
+          example: card.example || "",
+          imageUrl: card.imageUrl || "",
+        })),
+      };
+
+      await setApi.createSet(uuidv4(), payload);
 
       toast.success("Tạo bộ từ thành công!");
-      setTimeout(() => navigate("/admin/admin-vocab/list-page"), 1500);
-    } catch (err) {
-      console.error("Lỗi khi tạo bộ từ:", err);
-      toast.error("Có lỗi xảy ra khi tạo bộ từ");
+      setTimeout(() => navigate("/admin/admin-vocab/list-page"), 100);
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        toast.error(err.response?.data?.message || "Có lỗi xảy ra khi tạo bộ từ");
+      } else {
+        toast.error("Lỗi không xác định");
+      }
     }
   };
 
@@ -84,18 +99,20 @@ const AddPage = () => {
   };
 
   const handleImageUpload = (index: number, file: File) => {
-    // Xử lý upload ảnh ở đây (giả lập)
     const reader = new FileReader();
     reader.onload = (e) => {
       const updatedCards = [...cards];
-      updatedCards[index].imageUrl = e.target?.result as string;
-      setCards(updatedCards);
+      if (e.target?.result) {
+        updatedCards[index].imageUrl = e.target.result as string;
+        setCards(updatedCards);
+      }
     };
     reader.readAsDataURL(file);
   };
 
   return (
     <div className="container mx-auto p-4 max-w-6xl">
+      <ToastContainer />
       <div className="bg-white rounded-lg shadow p-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-6">Tạo bộ từ mới</h1>
 
@@ -116,9 +133,7 @@ const AddPage = () => {
         {/* Danh sách thẻ từ vựng */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-700">
-              Danh sách từ vựng
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-700">Danh sách từ vựng</h2>
             <button
               onClick={addCard}
               className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition"
@@ -132,30 +147,26 @@ const AddPage = () => {
             {cards.map((card, index) => (
               <div
                 key={card.id}
-                className="border border-gray-200 rounded-xl shadow-sm overflow-hidden bg-white hover:shadow-md transition-shadow"
+                className="border border-gray-200 rounded-xl shadow-sm bg-white hover:shadow-md transition-shadow"
               >
-                {/* Header */}
                 <div className="flex justify-between items-center p-3 border-b bg-gray-50">
-                  <span className="text-sm font-medium text-gray-500">
-                    Thẻ {index + 1}
-                  </span>
+                  <span className="text-sm font-medium text-gray-500">Thẻ {index + 1}</span>
                   <button
                     onClick={() => removeCard(card.id)}
                     className="text-gray-400 hover:text-red-500 transition"
-                    aria-label="Xóa thẻ"
                   >
                     <X size={18} />
                   </button>
                 </div>
 
-                {/* Image upload */}
-                <div className="p-4">
-                  <div className="relative h-40 mb-4 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                <div className="p-4 space-y-4">
+                  {/* Upload ảnh */}
+                  <div className="relative h-40 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
                     {card.imageUrl ? (
                       <img
                         src={card.imageUrl}
                         alt="Preview"
-                        className="absolute inset-0 w-full h-full object-cover rounded-lg"
+                        className="h-full w-full object-contain rounded-lg absolute inset-0 "
                       />
                     ) : (
                       <div className="text-center p-4">
@@ -176,84 +187,69 @@ const AddPage = () => {
                     )}
                   </div>
 
-                  {/* Input fields */}
-                  <div className="space-y-3">
+                  {/* Từ vựng */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Từ vựng *
+                    </label>
                     <div className="relative">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Từ vựng *
-                      </label>
-                      <div className="flex">
-                        <input
-                          type="text"
-                          placeholder="Nhập từ vựng"
-                          value={card.word}
-                          onChange={(e) =>
-                            handleInputChange(index, "word", e.target.value)
-                          }
-                          className="flex-1 p-2 border border-gray-300 rounded-l-lg focus:ring-blue-500 focus:border-blue-500"
-                        />
-                        <button className="px-3 bg-gray-100 border-t border-r border-b border-gray-300 rounded-r-lg text-gray-500 hover:bg-gray-200">
-                          <Volume2 size={16} />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phiên âm
-                      </label>
                       <input
                         type="text"
-                        placeholder="Nhập phiên âm"
-                        value={card.pronunciation}
-                        onChange={(e) =>
-                          handleInputChange(
-                            index,
-                            "pronunciation",
-                            e.target.value
-                          )
-                        }
+                        placeholder="Nhập từ vựng"
+                        value={card.word}
+                        onChange={(e) => handleInputChange(index, "word", e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                       />
+                      <button className="absolute right-2 top-2 text-gray-400 hover:text-blue-500">
+                        <Edit3 size={16} />
+                      </button>
                     </div>
+                  </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Nghĩa *
-                      </label>
+                  {/* Phiên âm */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Phiên âm
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Nhập phiên âm"
+                      value={card.pronunciation}
+                      onChange={(e) => handleInputChange(index, "pronunciation", e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+
+                  {/* Nghĩa */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Nghĩa *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Nhập nghĩa"
+                      value={card.translation}
+                      onChange={(e) => handleInputChange(index, "translation", e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+
+                  {/* Ví dụ */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Ví dụ
+                    </label>
+                    <div className="relative">
                       <input
                         type="text"
-                        placeholder="Nhập nghĩa"
-                        value={card.translation}
-                        onChange={(e) =>
-                          handleInputChange(
-                            index,
-                            "translation",
-                            e.target.value
-                          )
-                        }
+                        placeholder="Nhập ví dụ"
+                        value={card.example}
+                        onChange={(e) => handleInputChange(index, "example", e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                       />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Ví dụ
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          placeholder="Nhập câu ví dụ"
-                          value={card.example}
-                          onChange={(e) =>
-                            handleInputChange(index, "example", e.target.value)
-                          }
-                          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 pr-10"
-                        />
-                        <button className="absolute right-2 top-2 text-gray-400 hover:text-blue-500">
-                          <Edit3 size={16} />
-                        </button>
-                      </div>
+                      <button className="absolute right-2 top-2 text-gray-400 hover:text-blue-500">
+                        <Edit3 size={16} />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -262,7 +258,7 @@ const AddPage = () => {
           </div>
         </div>
 
-        {/* Submit button */}
+        {/* Nút submit */}
         <div className="flex justify-end gap-3 mt-6">
           <button
             onClick={() => navigate("/admin/admin-vocab/list-page")}

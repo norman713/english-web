@@ -1,168 +1,147 @@
-import { useEffect, useState } from "react";
+// src/pages/Admin/AdminVocab/ListPage/index.tsx
 
+import React, { useEffect, useState } from "react";
 import VocabSetCard from "../../../../components/VocabSetCard";
-import { MagnifyingGlass } from "@phosphor-icons/react";
-import StatusTab from "../../../../components/StatusTab";
+import setApi from "../../../../api/setApi";  // Đường dẫn tới file setApi.ts
 
-interface VocabularySet {
-  id?: string | undefined;
+// 1. Định nghĩa interface cho từng mục trả về
+interface VocabSet {
+  id: string;
   name: string;
-  wordCount?: number | undefined;
-  // Remove status and progress as they should come from backend or be calculated separately
+  wordCount: number;
+  createdBy?: string;  // Thêm các trường khác nếu cần
+  createAt?: string;
+  updatedBy?: string;
+  updatedAt?: string;
+  isDeleted?: boolean;
 }
 
-const MyList = () => {
+const MyList: React.FC = () => {
+
+  // 3. Các state cần thiết
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [vocabList, setVocabList] = useState<VocabularySet[]>([]);
   const [totalPages, setTotalPages] = useState(1);
+  const [vocabList, setVocabList] = useState<VocabSet[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const pageSize = 8;
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     setIsLoading(true);
-  //     try {
-  //       const { data, totalPages } = await getVocabularySets(currentPage - 1, pageSize);
-  //       setVocabList(data || []);
-  //       setTotalPages(totalPages || 1);
-  //     } catch (err) {
-  //       console.error("Error fetching vocabulary sets:", err);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
+  // Hàm chuyển sang trang thêm mới
 
-  //   fetchData();
-  // }, [currentPage]);
+  useEffect(() => {
+    const fetchVocabSets = async () => {
+      setIsLoading(true);
+      try {
+        const response = await setApi.getAll(currentPage, 10);
+        console.log("API data:", response); // Kiểm tra dữ liệu trả về
+        
+        // Đảm bảo response.data có cấu trúc đúng
+        if (response && response.sets) {
+          setVocabList(response.sets);
+          setTotalPages(response.totalPages);
+        } else {
+          console.error("Dữ liệu trả về không đúng cấu trúc:", response);
+          setVocabList([]); // Đặt về mảng rỗng nếu dữ liệu không hợp lệ
+        }
+      } catch (err) {
+        console.error("Lỗi khi gọi API:", err);
+        setVocabList([]); // Đặt về mảng rỗng khi có lỗi
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    fetchVocabSets();
+  }, [currentPage]);
 
-  const filteredVocabList = vocabList.filter((vocab) =>
-    vocab.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // 5. Lọc danh sách theo ô tìm kiếm
+  const filteredVocabList = vocabList.filter(v =>
+    v.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Trạng thái */}
-      <div className="flex justify-center items-center gap-[70px] py-[30px]">
-        <StatusTab number={20} text="đã học" backgroundColor="bg-[#F3F7FF]" />
-        <StatusTab number={5} text="đã nhớ" backgroundColor="bg-[#E6F7E6]" />
-        <StatusTab
-          number={3}
-          text="chưa học"
-          backgroundColor="bg-[#FFE6E6]"
-          numberColor="text-[#FA1616]"
-        />
+  
+return (
+  <div className="vocab-container">
+    <div className="vocab-tab bg-[rgba(169,201,227,0.23)] min-h-screen">
+      <div className="top-vocab p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <h2 className="text-3xl font-bold text-blue-900">
+            Danh sách chủ đề hiện có
+          </h2>        
+        </div>
+
+        <div className="search-container flex items-center border-2 border-blue-300 rounded px-2 bg-white">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 text-blue-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M11 4a7 7 0 100 14 7 7 0 000-14zm10 10l-4-4"
+            />
+          </svg>
+          <input
+            type="text"
+            placeholder="Tìm kiếm"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full p-2 outline-none bg-transparent"
+          />
+        </div>
       </div>
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        {/* Header Section */}
-        <div className="p-6 bg-gradient-to-r from-blue-50 to-cyan-50 border-b">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-[#2754A7]">
-                List từ của tôi
-              </h1>
-              <p className="text-gray-600">
-                Manage your vocabulary collections
-              </p>
-            </div>
 
-            <div className="relative flex-1 min-w-[200px]">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <MagnifyingGlass size={20} className="text-gray-400" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search sets..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="pl-10 w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          </div>
-        </div>
+      {/* Kết quả tìm kiếm */}
 
-        {/* Results Info */}
-        <div className="px-6 py-3 bg-gray-50 border-b">
-          {filteredVocabList.length > 0 ? (
-            <p className="text-sm text-gray-600">
-              Showing {filteredVocabList.length} set
-              {filteredVocabList.length !== 1 ? "s" : ""}
-              {searchQuery && ` matching "${searchQuery}"`}
-            </p>
-          ) : (
-            <p className="text-sm text-gray-600">
-              {isLoading ? "Loading..." : "No sets found"}
-              {searchQuery && ` for "${searchQuery}"`}
-            </p>
-          )}
-        </div>
-
-        {/* Vocabulary Sets Grid */}
-        <div className="p-6">
-          {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <div
-                  key={i}
-                  className="h-48 bg-gray-100 rounded-lg animate-pulse"
-                ></div>
-              ))}
-            </div>
-          ) : filteredVocabList.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredVocabList.map((vocab) => (
-                <VocabSetCard
-                  key={vocab.id || vocab.name} // Fallback to name if id is undefined
-                  title={vocab.name}
-                  wordsCount={vocab.wordCount ?? 0}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                <MagnifyingGlass size={40} className="text-gray-400" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-700">
-                No vocabulary sets found
-              </h3>
-              <p className="mt-1 text-gray-500">
-                {searchQuery
-                  ? "Try a different search term"
-                  : "Create some sets to get started"}
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="px-6 py-4 border-t flex justify-center">
-            <nav className="flex items-center gap-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`w-10 h-10 flex items-center justify-center rounded-full transition ${
-                      currentPage === page
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                )
-              )}
-            </nav>
-          </div>
+      {/* Danh sách từ vựng */}
+      { <div className="vocab-list p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mx-10">
+        {isLoading ? (
+          [...Array(4)].map((_, index) => (
+            <div key={index} className="h-48 bg-gray-200 rounded-lg animate-pulse"></div>
+          ))
+        ) : filteredVocabList.length > 0 ? (
+          filteredVocabList.map((vocab,index) => (
+            <VocabSetCard
+            key={index}
+            id={vocab.id}
+            title={vocab.name}
+            wordsCount={vocab.wordCount}
+            />
+          ))
+        ) : (
+          <p className="text-center text-gray-500 col-span-full">
+            Không tìm thấy danh sách từ vựng nào.
+          </p>
         )}
-      </div>
+      </div> }
+
+      {/* Phân trang */}
+      {totalPages > 1 && !isLoading && (
+        <div className="pagination p-4 text-center space-x-2">
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              className={`pagination-button px-3 py-1 rounded transition-colors duration-200 ${
+                currentPage === page
+                  ? "bg-blue-900 text-white"
+                  : "text-black hover:bg-white hover:text-blue-900 border hover:border-blue-900"
+              }`}
+              onClick={() => setCurrentPage(page)}
+            >
+              {page}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
-  );
+  </div>
+);
 };
 
 export default MyList;
