@@ -86,9 +86,15 @@ const AdminTestPage = () => {
         {/* Top Test */}
         <div className="top-test p-4 flex items-center justify-between gap-4">
           <h2 className="text-3xl font-bold text-blue-900">Danh sách đề thi</h2>
-          <button className="bg-[#9FC7FF] hover:bg-blue-400 text-black font-bold py-2 px-4 text-[20px] rounded-full">
-            Thêm bộ đề mới
-          </button>
+          <div className="flex gap-6">
+            <button className="bg-[#FC9A9A] hover:bg-[#f67280] text-black font-bold py-2 px-4 text-[20px] rounded-full">
+              Bộ đề đã xóa
+            </button>
+            <button className="bg-[#9FC7FF] hover:bg-blue-400 text-black font-bold py-2 px-4 text-[20px] rounded-full">
+              Thêm bộ đề mới
+            </button>
+          </div>
+
           {/* search bar */}
           <div className="search-container flex items-center border border-blue-300 rounded px-2 w-[373px]">
             <svg
