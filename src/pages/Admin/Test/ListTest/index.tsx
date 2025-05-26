@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { MdOutlineDelete } from "react-icons/md";
 import Pagination from "../../../../components/Pagination";
+import { useNavigate } from "react-router-dom";
 
 const AdminTestPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
 
   // mock data about test
   const [testList, setTestList] = useState([
@@ -147,7 +149,10 @@ const AdminTestPage = () => {
                   <p>Phiên bản: {test.version}</p>
                 </div>
               </div>
-              <button className="bg-[#F8F7FF] text-[#4F79F5] text-[16px] font-bold w-full py-2 rounded">
+              <button
+                className="bg-[#F8F7FF] text-[#4F79F5] text-[16px] font-bold w-full py-2 rounded"
+                onClick={() => navigate(`/admin/test/${test.id}`)}
+              >
                 Chi tiết
               </button>
             </div>

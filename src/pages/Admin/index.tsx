@@ -4,7 +4,7 @@ const Admin = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar activeTab={"vocab"} userType={"admin"} />
-      <div className="p-4">
+      <div>
         <Outlet />
       </div>
     </div>

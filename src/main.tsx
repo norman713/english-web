@@ -23,6 +23,7 @@ import VocabSetCardDetails from "./pages/User/VocabSetCardDetails";
 import FlashcardsPage from "./pages/User/VocabSetCardDetails/FlashcardPage";
 import FlashCardSet from "./pages/User/VocabSetCardDetails/FlashcardSet";
 import AdminTestPage from "./pages/Admin/Test/ListTest";
+import TestDetailPage from "./pages/Admin/Test/Detail";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -57,8 +58,13 @@ createRoot(document.getElementById("root")!).render(
             <Route path="list-page" element={<ListPage />} />
             <Route path="add-page" element={<AddPage />} />
           </Route>
-          {/* Trang test */}
-          <Route path="test" element={<AdminTestPage />} />
+
+          {/* Test routes */}
+          <Route path="test">
+            <Route index element={<AdminTestPage />} /> {/* render ListTest */}
+            <Route path=":id" element={<TestDetailPage />} />{" "}
+            {/* render chi tiết đề */}
+          </Route>
         </Route>
       </Routes>
     </Router>
