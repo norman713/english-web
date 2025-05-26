@@ -1,12 +1,12 @@
 import { Outlet } from "react-router-dom";
-const AdminVocabLayout = () => {
+const TestLayout = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="p-4">
+      <div className="p-5">
         <Outlet />
       </div>
     </div>
   );
 };
 
-export default AdminVocabLayout;
+export default TestLayout;

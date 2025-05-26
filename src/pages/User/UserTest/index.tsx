@@ -21,33 +21,37 @@ const TestPage = () => {
       questionNumber: 100,
       testTime: "60 phút",
       testType: "TOEFL",
-    },  {
-      title: "TOEFL Mock Test",
-      questionNumber: 100,
-      testTime: "60 phút",
-      testType: "TOEFL",
-    },  {
-      title: "TOEFL Mock Test",
-      questionNumber: 100,
-      testTime: "60 phút",
-      testType: "TOEFL",
-    },  {
-      title: "TOEFL Mock Test",
-      questionNumber: 100,
-      testTime: "60 phút",
-      testType: "TOEFL",
-    },  {
-      title: "TOEFL Mock Test",
-      questionNumber: 100,
-      testTime: "60 phút",
-      testType: "TOEFL",
-    },  {
+    },
+    {
       title: "TOEFL Mock Test",
       questionNumber: 100,
       testTime: "60 phút",
       testType: "TOEFL",
     },
- 
+    {
+      title: "TOEFL Mock Test",
+      questionNumber: 100,
+      testTime: "60 phút",
+      testType: "TOEFL",
+    },
+    {
+      title: "TOEFL Mock Test",
+      questionNumber: 100,
+      testTime: "60 phút",
+      testType: "TOEFL",
+    },
+    {
+      title: "TOEFL Mock Test",
+      questionNumber: 100,
+      testTime: "60 phút",
+      testType: "TOEFL",
+    },
+    {
+      title: "TOEFL Mock Test",
+      questionNumber: 100,
+      testTime: "60 phút",
+      testType: "TOEFL",
+    },
   ];
   return (
     <div className="test-container">
@@ -88,10 +92,14 @@ const TestPage = () => {
               test.title.toLowerCase().includes(searchQuery.toLowerCase())
             )
             .map((test, index) => (
-              <div key={index} className="test-item p-4 rounded bg-[rgba(99,176,239,0.23)]">
+              <div
+                key={index}
+                className="test-item p-4 rounded bg-[rgba(99,176,239,0.23)]"
+              >
                 <h3 className="test-title font-bold text-2xl">{test.title}</h3>
                 <p className="test-detail text-[20px] font-bold text-[rgba(0,0,0,0.50)]">
-                  <span className="icon-text">📄</span> {test.questionNumber} câu hỏi
+                  <span className="icon-text">📄</span> {test.questionNumber}{" "}
+                  câu hỏi
                 </p>
                 <p className="test-detail text-[20px] font-bold text-[rgba(0,0,0,0.50)]">
                   <span className="icon-clock">⏰</span> {test.testTime}
