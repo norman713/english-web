@@ -93,7 +93,6 @@ const Navbar = ({ activeTab, userType }: NavbarProps) => {
 
           {userType === "admin" && (
             <>
-              
               <Link
                 to="/admin"
                 className={`nav-link ${getNavLinkColor("vocab")}`}
@@ -117,7 +116,7 @@ const Navbar = ({ activeTab, userType }: NavbarProps) => {
         </div>
 
         {/* Hiển thị Login nếu chưa đăng nhập, hoặc hiển thị user/admin nếu đã đăng nhập */}
-        <div className="flex items-center">
+        <div className="flex px- [40px]">
           {isLoggedIn ? (
             <div className="relative flex items-center space-x-5">
               <img
