@@ -24,6 +24,8 @@ import FlashcardsPage from "./pages/User/VocabSetCardDetails/FlashcardPage";
 import FlashCardSet from "./pages/User/VocabSetCardDetails/FlashcardSet";
 import AdminTestPage from "./pages/Admin/Test/ListTest";
 import TestDetailPage from "./pages/Admin/Test/Detail";
+import AddTestPage from "./pages/Admin/Test/Add";
+import DeleteTestPage from "./pages/Admin/Test/Delete";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -63,7 +65,8 @@ createRoot(document.getElementById("root")!).render(
           <Route path="test">
             <Route index element={<AdminTestPage />} /> {/* render ListTest */}
             <Route path=":id" element={<TestDetailPage />} />{" "}
-            {/* render chi tiết đề */}
+            <Route path="add-test" element={<AddTestPage />} />
+            <Route path="deleted" element={<DeleteTestPage />} />
           </Route>
         </Route>
       </Routes>
