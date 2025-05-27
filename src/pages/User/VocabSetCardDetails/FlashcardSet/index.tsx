@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import setApi from "../../../../api/setApi";
 import { VocabSet, VocabWord } from "../../../../api/setApi";
-import studentImage from "/src/assets/student.png";
+
 
 const FlashCardSet = () => {
   const navigate = useNavigate();
@@ -101,7 +101,7 @@ const FlashCardSet = () => {
               </div>
               <div className="w-1/2 items-center justify-center ml-6">
                 <img
-                  src={word.imageUrl || studentImage}
+                  src={word.imageUrl}
                   alt={word.word}
                   className="h-full w-full object-contain rounded-lg"
                 />

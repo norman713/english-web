@@ -37,6 +37,7 @@ export interface VocabSet {
   updatedBy?: string;
   updatedAt?: string;
   isDeleted?: boolean;
+  version?: string; // Thêm version nếu cần
 }
 
 export interface GetSetsResponse {
@@ -48,6 +49,14 @@ export interface GetWordsResponse {
   words: VocabWord[];
   totalItems: number;
   totalPages: number;
+}
+// Response sau khi cập nhật (cả name và words)
+export interface UpdateSetResponse {
+  id: string;
+  name: string;
+  version: number;
+  updatedBy: string;
+  updateAt: string;
 }
 
 const setApi = {
@@ -74,7 +83,37 @@ const setApi = {
     const url = `/api/words?setId=${setId}&page=${page}&size=${size}`;
     const response = await axiosClient.get<GetWordsResponse>(url);
     return response.data;
-  }
+  },
+  // PATCH /api/sets/{id}/name
+async updateSetName(
+  setId: string,
+  userId: string,
+  name: string
+): Promise<UpdateSetResponse> {
+  const url = `/api/sets/${setId}/name?userId=${userId}&name=${encodeURIComponent(name)}`;
+  const response = await axiosClient.patch<UpdateSetResponse>(url);
+  return response.data;
+},
+
+// PATCH /api/sets/{id}
+async updateSetById(
+  setId: string,
+  userId: string,
+  payload: { words: VocabWord[] }
+): Promise<UpdateSetResponse> {
+  const url = `/api/sets/${setId}?userId=${userId}`;
+  const response = await axiosClient.patch<UpdateSetResponse>(url, payload);
+  return response.data;
+},
+
+  // src/api/setApi.ts
+  async deleteSet(id: string, userId: string): Promise<void> {
+    await axiosClient.delete(`/api/sets`, {
+      params: { id, userId },
+    });
+},
+
+  
 };
 
 export default setApi;

@@ -26,7 +26,7 @@ import AdminTestPage from "./pages/Admin/Test/ListTest";
 import TestDetailPage from "./pages/Admin/Test/Detail";
 import AddTestPage from "./pages/Admin/Test/Add";
 import DeleteTestPage from "./pages/Admin/Test/Delete";
-
+import UpdatePage from "./pages/Admin/AdminVocab/UpdatePage";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Router>
@@ -58,6 +58,7 @@ createRoot(document.getElementById("root")!).render(
           {/* Layout riêng cho vocab */}
           <Route path="admin-vocab" element={<AdminVocabLayout />}>
             <Route path="list-page" element={<ListPage />} />
+            <Route path="update-page/:setId" element={<UpdatePage />} />
             <Route path="add-page" element={<AddPage />} />
           </Route>
 
