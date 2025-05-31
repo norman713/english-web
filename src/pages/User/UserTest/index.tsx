@@ -1,6 +1,10 @@
 import { useState } from "react";
+import Pagination from "../../../components/Pagination";
+
 const TestPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6; // số lượng test mỗi trang
 
   // Dữ liệu demo cho các bài kiểm tra
   const testList = [
@@ -53,6 +57,24 @@ const TestPage = () => {
       testType: "TOEFL",
     },
   ];
+
+  // Lọc theo search
+  const filteredTests = testList.filter((test) =>
+    test.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Tính phần tử hiển thị theo trang hiện tại
+  const lastIndex = currentPage * itemsPerPage;
+  const firstIndex = lastIndex - itemsPerPage;
+  const currentTests = filteredTests.slice(firstIndex, lastIndex);
+
+  // Xử lý đổi trang
+  const onPageChange = (page: number) => {
+    if (page < 1 || page > Math.ceil(filteredTests.length / itemsPerPage))
+      return;
+    setCurrentPage(page);
+  };
+
   return (
     <div className="test-container">
       {/* Test Tab */}
@@ -79,7 +101,10 @@ const TestPage = () => {
               type="text"
               placeholder="Tìm kiếm"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1); // Reset về trang 1 khi search thay đổi
+              }}
               className="w-full p-2 outline-none"
             />
           </div>
@@ -87,42 +112,39 @@ const TestPage = () => {
 
         {/* Test List */}
         <div className="test-list p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mx-10">
-          {testList
-            .filter((test) =>
-              test.title.toLowerCase().includes(searchQuery.toLowerCase())
-            )
-            .map((test, index) => (
-              <div
-                key={index}
-                className="test-item p-4 rounded bg-[rgba(99,176,239,0.23)]"
-              >
-                <h3 className="test-title font-bold text-2xl">{test.title}</h3>
-                <p className="test-detail text-[20px] font-bold text-[rgba(0,0,0,0.50)]">
-                  <span className="icon-text">📄</span> {test.questionNumber}{" "}
-                  câu hỏi
-                </p>
-                <p className="test-detail text-[20px] font-bold text-[rgba(0,0,0,0.50)]">
-                  <span className="icon-clock">⏰</span> {test.testTime}
-                </p>
-                <p className="test-detail text-[20px] font-bold text-[rgba(0,0,0,0.50)]">
-                  <span className="icon-hashtag">#</span> {test.testType}
-                </p>
-                <div className="test-buttons flex space-x-2 mt-4">
-                  <button className="start-button bg-white text-blue-500 rounded flex justify-center items-end gap-10 p-2 w-full">
-                    Chi tiết
-                  </button>
-                </div>
+          {currentTests.map((test, index) => (
+            <div
+              key={index}
+              className="test-item p-4 rounded bg-[rgba(99,176,239,0.23)]"
+            >
+              <h3 className="test-title font-bold text-2xl">{test.title}</h3>
+              <p className="test-detail text-[20px] font-bold text-[rgba(0,0,0,0.50)]">
+                <span className="icon-text">📄</span> {test.questionNumber} câu
+                hỏi
+              </p>
+              <p className="test-detail text-[20px] font-bold text-[rgba(0,0,0,0.50)]">
+                <span className="icon-clock">⏰</span> {test.testTime}
+              </p>
+              <p className="test-detail text-[20px] font-bold text-[rgba(0,0,0,0.50)]">
+                <span className="icon-hashtag">#</span> {test.testType}
+              </p>
+              <div className="test-buttons flex space-x-2 mt-4">
+                <button className="start-button bg-white text-blue-500 rounded flex justify-center items-end gap-10 p-2 w-full">
+                  Chi tiết
+                </button>
               </div>
-            ))}
+            </div>
+          ))}
         </div>
 
         {/* Pagination */}
-        <div className="pagination p-4 text-center">
-          <button className="pagination-button">1</button>
-          <button className="pagination-button">2</button>
-          <button className="pagination-button">3</button>
-          <button className="pagination-button">10</button>
-        </div>
+        <Pagination
+          totalItems={filteredTests.length}
+          itemsPerPage={itemsPerPage}
+          currentPage={currentPage}
+          onPageChange={onPageChange}
+          siblingCount={1} // có thể tùy chỉnh
+        />
       </div>
     </div>
   );
