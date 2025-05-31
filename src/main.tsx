@@ -14,7 +14,6 @@ import VocabLayout from "./pages/User/UserVocab";
 import MyList from "./pages/User/UserVocab/MyList/MyList";
 import Learning from "./pages/User/UserVocab/Learning";
 import Explore from "./pages/User/UserVocab/Explore";
-import TestPage from "./pages/User/UserTest";
 import ListPage from "./pages/Admin/AdminVocab/ListPage";
 import AddPage from "./pages/Admin/AdminVocab/AddPage";
 import Admin from "./pages/Admin";
@@ -27,6 +26,9 @@ import TestDetailPage from "./pages/Admin/Test/Detail";
 import AddTestPage from "./pages/Admin/Test/Add";
 import DeleteTestPage from "./pages/Admin/Test/Delete";
 import UpdatePage from "./pages/Admin/AdminVocab/UpdatePage";
+import UserTestPage from "./pages/User/UserTest/ListTest";
+import UserTestDetailPage from "./pages/User/UserTest/Detail";
+import OverallTestPage from "./pages/User/UserTest/Overall";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Router>
@@ -49,7 +51,12 @@ createRoot(document.getElementById("root")!).render(
             <Route path="flashcard" element={<FlashcardsPage />} />
           </Route>
 
-          <Route path="test" element={<TestPage />} />
+          {/* Test routes */}
+          <Route path="test">
+            <Route index element={<UserTestPage />} />
+            <Route path=":id" element={<UserTestDetailPage />} />
+            <Route path="overall/:id" element={<OverallTestPage />} />
+          </Route>
         </Route>
 
         <Route path="/admin" element={<Admin />}>
@@ -64,7 +71,7 @@ createRoot(document.getElementById("root")!).render(
 
           {/* Test routes */}
           <Route path="test">
-            <Route index element={<AdminTestPage />} /> {/* render ListTest */}
+            <Route index element={<AdminTestPage />} />
             <Route path=":id" element={<TestDetailPage />} />{" "}
             <Route path="add-test" element={<AddTestPage />} />
             <Route path="deleted" element={<DeleteTestPage />} />
