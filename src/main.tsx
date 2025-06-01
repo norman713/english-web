@@ -37,6 +37,7 @@ import LoginPage from "./pages/Auth/Login";
 import SignUpPage from "./pages/Auth/SignUp";
 import StatisticPage from "./pages/User/Statictic";
 import AdminStatisticPage from "./pages/Admin/Statistic";
+import UserDetailsPage from "./pages/Admin/User";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Router>
@@ -92,6 +93,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="deleted" element={<DeleteTestPage />} />
           </Route>
           <Route path="statistic" element={<AdminStatisticPage />} />
+          <Route path="user" element={<UserDetailsPage />} />
         </Route>
       </Routes>
     </Router>

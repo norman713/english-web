@@ -111,6 +111,12 @@ const Navbar = ({ activeTab, userType }: NavbarProps) => {
               >
                 Statistic
               </Link>
+              <Link
+                to="/admin/user"
+                className={`nav-link ${getNavLinkColor("user")}`}
+              >
+                User
+              </Link>
             </>
           )}
         </div>
