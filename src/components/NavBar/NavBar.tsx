@@ -1,7 +1,7 @@
 import { ChevronDown } from "lucide-react";
 import logo from "../../assets/logo-removebg-preview (1).png";
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom"; // Import Link và useLocation từ react-router-dom
+import { Link, useLocation } from "react-router-dom";
 
 interface NavbarProps {
   activeTab: string;
@@ -9,7 +9,7 @@ interface NavbarProps {
 }
 
 const Navbar = ({ activeTab, userType }: NavbarProps) => {
-  const location = useLocation(); // Lấy thông tin đường dẫn hiện tại
+  const location = useLocation();
   const isLoggedIn = userType !== "guest";
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -25,12 +25,12 @@ const Navbar = ({ activeTab, userType }: NavbarProps) => {
   const userInfo = {
     user: {
       avatar:
-        "https://thuthuatnhanh.com/wp-content/uploads/2022/06/anh-cho-hai-lo-toc.jpg", // Thay bằng URL ảnh của user
+        "https://thuthuatnhanh.com/wp-content/uploads/2022/06/anh-cho-hai-lo-toc.jpg",
       name: "Jennie",
     },
     admin: {
       avatar:
-        "https://sieupet.com/sites/default/files/pictures/images/1-1473150685951-5.jpg", // Thay bằng URL ảnh của admin
+        "https://sieupet.com/sites/default/files/pictures/images/1-1473150685951-5.jpg",
       name: "Admin",
     },
   };

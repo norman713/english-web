@@ -36,6 +36,7 @@ import Part3Detail from "./pages/User/UserTest/Result/Part3";
 import LoginPage from "./pages/Auth/Login";
 import SignUpPage from "./pages/Auth/SignUp";
 import StatisticPage from "./pages/User/Statictic";
+import AdminStatisticPage from "./pages/Admin/Statistic";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Router>
@@ -90,6 +91,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="add-test" element={<AddTestPage />} />
             <Route path="deleted" element={<DeleteTestPage />} />
           </Route>
+          <Route path="statistic" element={<AdminStatisticPage />} />
         </Route>
       </Routes>
     </Router>
