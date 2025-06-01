@@ -1,110 +1,98 @@
-import { useState } from "react";
+// src/pages/Admin/AdminTestPage.tsx
+
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { MdOutlineDelete } from "react-icons/md";
 import Pagination from "../../../../components/Pagination";
-import { useNavigate } from "react-router-dom";
+import testApi, { TestItem, GetTestsResponse } from "../../../../api/testApi";
 
-const AdminTestPage = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+const AdminTestPage: React.FC = () => {
   const navigate = useNavigate();
 
-  // mock data about test
-  const [testList, setTestList] = useState([
-    {
-      id: 1,
-      title: "2024 Toeic Test",
-      questionNumber: 200,
-      testTime: "120 phút",
-      testType: "Toeic",
-      version: 1.0,
-    },
-    {
-      id: 2,
-      title: "IELTS Practice Test",
-      questionNumber: 150,
-      testTime: "90 phút",
-      testType: "IELTS",
-      version: 1.0,
-    },
-    {
-      id: 3,
-      title: "TOEFL Mock Test",
-      questionNumber: 100,
-      testTime: "60 phút",
-      testType: "TOEFL",
-      version: 2.0,
-    },
-    {
-      id: 4,
-      title: "TOEFL Mock Test",
-      questionNumber: 100,
-      testTime: "60 phút",
-      testType: "TOEFL",
-      version: 2.0,
-    },
-    {
-      id: 5,
-      title: "TOEFL Mock Test",
-      questionNumber: 100,
-      testTime: "60 phút",
-      testType: "TOEFL",
-      version: 3.0,
-    },
-    {
-      id: 6,
-      title: "TOEFL Mock Test",
-      questionNumber: 100,
-      testTime: "60 phút",
-      testType: "TOEFL",
-      version: 1.0,
-    },
-  ]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [testList, setTestList] = useState<TestItem[]>([]);
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // delete test
-  const handleDelete = (id: number) => {
+  // Số items hiển thị mỗi trang (ở đây giữ nguyên 8)
+  const itemsPerPage = 8;
+
+  // Khi currentPage thay đổi, fetch lại data từ server
+  useEffect(() => {
+    const fetchTests = async () => {
+      setIsLoading(true);
+      try {
+        // Gọi endpoint GET /api/tests/all?page=...&size=...
+        const response: GetTestsResponse = await testApi.getAll(currentPage, itemsPerPage);
+        setTestList(response.tests);
+        setTotalItems(response.totalItems);
+        setTotalPages(response.totalPages);
+      } catch (err) {
+        console.error("Lỗi khi gọi API testApi.getAll:", err);
+        setTestList([]);
+        setTotalItems(0);
+        setTotalPages(1);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchTests();
+  }, [currentPage]);
+
+  // Lọc client‐side dựa trên searchQuery
+  const filteredList = testList.filter((t) =>
+    t.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Điều hướng đến trang thêm mới test
+  const handleAddNew = (): void => {
+    navigate("/admin/test/add-test");
+  };
+
+  // Xóa test
+  const handleDeleteTest = async (id: string): Promise<void> => {
     const confirmDelete = window.confirm("Bạn có chắc muốn xoá bộ đề này?");
-    if (confirmDelete) {
-      const updatedList = testList.filter((test) => test.id !== id);
-      setTestList(updatedList);
+    if (!confirmDelete) return;
+
+    try {
+      await testApi.deleteTest(id);
+      // Lọc khỏi state để cập nhật UI ngay
+      setTestList((prev) => prev.filter((t) => t.id !== id));
+      // Cập nhật tổngItems
+      setTotalItems((prev) => prev - 1);
+
+      // Nếu sau khi xóa trang hiện tại trống và currentPage > 1, giảm page
+      const pagesAfterDeletion = Math.ceil((totalItems - 1) / itemsPerPage);
+      if (currentPage > pagesAfterDeletion && pagesAfterDeletion >= 1) {
+        setCurrentPage(pagesAfterDeletion);
+      }
+    } catch (error) {
+      console.error("Lỗi khi xóa test:", error);
+      alert("Xóa thất bại. Vui lòng thử lại.");
     }
   };
 
-  //pagination
-  const itemsPerPage = 5;
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const filteredTests = testList.filter((test) =>
-    test.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const paginatedTests = filteredTests.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
   return (
     <div className="test-container">
-      {/* Test Tab */}
-      <div className="test-tab ">
-        {/* Top Test */}
-        <div className="top-test p-4 flex items-center justify-between gap-4">
-          <h2 className="text-3xl font-bold text-blue-900">Danh sách đề thi</h2>
-          <div className="flex gap-6">
+      <div className="test-tab bg-[rgba(169,201,227,0.23)] min-h-screen">
+        {/* Header & Thêm mới */}
+        <div className="top-test p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <h2 className="text-3xl font-bold text-blue-900">
+              Danh sách bộ đề hiện có
+            </h2>
             <button
-              className="bg-[#FC9A9A] hover:bg-[#f67280] text-black font-bold py-2 px-4 text-[20px] rounded-full"
-              onClick={() => navigate("/admin/test/deleted")}
+              onClick={handleAddNew}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-700 transition"
             >
-              Bộ đề đã xóa
-            </button>
-            <button
-              className="bg-[#9FC7FF] hover:bg-blue-400 text-black font-bold py-2 px-4 text-[20px] rounded-full"
-              onClick={() => navigate("/admin/test/add-test")}
-            >
-              Thêm bộ đề mới
+              <span>Thêm mới</span>
             </button>
           </div>
 
-          {/* search bar */}
-          <div className="search-container flex items-center border border-blue-300 rounded px-2 w-[373px]">
+          {/* Search */}
+          <div className="search-container flex items-center border-2 border-blue-300 rounded px-2 bg-white">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5 text-blue-500"
@@ -123,57 +111,76 @@ const AdminTestPage = () => {
               type="text"
               placeholder="Tìm kiếm"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full p-2 outline-none"
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1); // reset về trang 1 khi thay đổi search
+              }}
+              className="w-full p-2 outline-none bg-transparent"
             />
           </div>
         </div>
 
-        {/* Test List */}
-        <div className="test-list p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mx-10">
-          {paginatedTests.map((test, index) => (
-            <div
-              key={index}
-              className="relative p-4 rounded-xl bg-[#D0E7F6] shadow-md flex flex-col justify-between h-[260px]"
-            >
-              <button
-                className="absolute top-2 right-2 text-gray-500 hover:text-red-500"
-                onClick={() => handleDelete(test.id)}
+        {/* List cards */}
+        <div className="test-list p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mx-10">
+          {isLoading ? (
+            // Hiển thị placeholder khi loading
+            [...Array(itemsPerPage)].map((_, idx) => (
+              <div
+                key={idx}
+                className="h-48 bg-gray-200 rounded-lg animate-pulse"
+              ></div>
+            ))
+          ) : filteredList.length > 0 ? (
+            filteredList.map((test) => (
+              <div
+                key={test.id}
+                className="relative p-4 rounded-xl bg-[#D0E7F6] shadow-md flex flex-col justify-between h-[260px]"
               >
-                <MdOutlineDelete size={30} className="text-[#31373F]" />
-              </button>
+                <button
+                  className="absolute top-2 right-2 text-gray-500 hover:text-red-500"
+                  onClick={() => handleDeleteTest(test.id)}
+                >
+                  <MdOutlineDelete size={24} className="text-[#31373F]" />
+                </button>
 
-              {/* content of test */}
-              <div>
-                <div className="font-bold text-[#31373F] text-[24px]">
-                  {test.title}
+                {/* Nội dung test */}
+                <div>
+                  <div className="font-bold text-[#31373F] text-[20px]">
+                    {test.name}
+                  </div>
+                  <div className="text-[16px] text-black opacity-60 space-y-1 font-medium">
+                    <p>{test.questionCount} câu hỏi</p>
+                    <p>{test.minutes} phút</p>
+                    <p>#{test.topic}</p>
+                    <p>Phiên bản: {test.version}</p>
+                  </div>
                 </div>
-                <div className="text-[18px] text-black opacity-50 space-y-1 font-bold">
-                  <p>{test.questionNumber} câu hỏi</p>
-                  <p>{test.testTime}</p>
-                  <p>#{test.testType}</p>
-                  <p>Phiên bản: {test.version}</p>
-                </div>
+                <button
+                  className="bg-[#F8F7FF] text-[#4F79F5] text-[14px] font-bold w-full py-2 rounded"
+                  onClick={() => navigate(`/admin/test/${test.id}`)}
+                >
+                  Chi tiết
+                </button>
               </div>
-              <button
-                className="bg-[#F8F7FF] text-[#4F79F5] text-[16px] font-bold w-full py-2 rounded"
-                onClick={() => navigate(`/admin/test/${test.id}`)}
-              >
-                Chi tiết
-              </button>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-center text-gray-500 col-span-full">
+              Không tìm thấy bộ đề nào.
+            </p>
+          )}
         </div>
 
-        {/* Pagination*/}
-        <div className="pagination p-4 text-center">
-          <Pagination
-            totalItems={filteredTests.length}
-            itemsPerPage={itemsPerPage}
-            currentPage={currentPage}
-            onPageChange={(page) => setCurrentPage(page)}
-          />
-        </div>
+        {/* Pagination */}
+        {!isLoading && totalPages > 1 && (
+          <div className="pagination p-4 text-center">
+            <Pagination
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              currentPage={currentPage}
+              onPageChange={(page) => setCurrentPage(page)}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

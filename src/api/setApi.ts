@@ -106,12 +106,27 @@ async updateSetById(
   return response.data;
 },
 
-  // src/api/setApi.ts
-  async deleteSet(id: string, userId: string): Promise<void> {
+ /** Xoá mềm 1 set (backend sẽ đọc userId từ JWT) */
+  async deleteSet(id: string): Promise<void> {
     await axiosClient.delete(`/api/sets`, {
-      params: { id, userId },
+      params: { id },
     });
-},
+  },
+
+  /** Lấy danh sách các set đã xóa */
+  async getDeletedAll(page: number, size: number): Promise<GetSetsResponse> {
+    const url = `/api/sets/deleted?page=${page}&size=${size}`;
+    const response = await axiosClient.get<GetSetsResponse>(url);
+    return response.data;
+  },
+
+  /** Khôi phục 1 set đã xóa (backend đọc userId từ JWT) */
+  async restoreSet(id: string): Promise<void> {
+    await axiosClient.patch(`/api/sets/restore`, null, {
+      params: { id },
+    });
+  },  
+
 
   
 };

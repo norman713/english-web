@@ -40,6 +40,7 @@ import AdminStatisticPage from "./pages/Admin/Statistic";
 import UserDetailsPage from "./pages/Admin/User";
 import ForgotPasswordPage from "./pages/Auth/Forgot";
 import ResetPasswordPage from "./pages/Auth/Reset";
+import DeletedPage from "./pages/Admin/AdminVocab/DeletedPage";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Router>
@@ -48,7 +49,9 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset" element={<ResetPasswordPage />} />
+        <Route path="/home" element={<Home />} />
 
+        {/* Layout không có Navbar */}
         {/* Layout có Navbar */}
         <Route path="/user" element={<User />}>
           <Route index element={<Navigate to="user-vocab/my-list" />} />
@@ -85,6 +88,7 @@ createRoot(document.getElementById("root")!).render(
           {/* Layout riêng cho vocab */}
           <Route path="admin-vocab" element={<AdminVocabLayout />}>
             <Route path="list-page" element={<ListPage />} />
+            <Route path="deleted-page" element={<DeletedPage />} />
             <Route path="update-page/:setId" element={<UpdatePage />} />
             <Route path="add-page" element={<AddPage />} />
           </Route>

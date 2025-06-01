@@ -1,45 +1,45 @@
-// src/pages/Admin/AdminVocab/ListPage/index.tsx
+// src/pages/Admin/AdminVocab/DeletedPage/index.tsx
 
 import React, { useEffect, useState } from "react";
 import VocabSetCard from "../../../../components/VocabSetCard";
-import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import setApi, { VocabSet } from "../../../../api/setApi";
 import Pagination from "../../../../components/Pagination";
+import { ArrowLeftCircle } from "lucide-react"; // chỉ để có nút “Quay lại”
 
-const ListPage: React.FC = () => {
+const DeletedPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [vocabList, setVocabList] = useState<VocabSet[]>([]);
+  const [deletedList, setDeletedList] = useState<VocabSet[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const itemsPerPage = 8;
 
-  // Lần đầu fetch toàn bộ set chưa xóa (size=9999 để client-side paging)
+  // Lần đầu fetch các set đã xóa
   useEffect(() => {
-    const fetchVocabSets = async () => {
+    const fetchDeletedSets = async () => {
       setIsLoading(true);
       try {
-        const response = await setApi.getAll(1, 9999);
+        const response = await setApi.getDeletedAll(1, 9999);
         if (response && response.sets) {
-          setVocabList(response.sets);
+          setDeletedList(response.sets);
         } else {
-          setVocabList([]);
+          setDeletedList([]);
         }
       } catch (err) {
-        console.error("Lỗi khi gọi API getAll:", err);
-        setVocabList([]);
+        console.error("Lỗi khi gọi API getDeletedAll:", err);
+        setDeletedList([]);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchVocabSets();
+    fetchDeletedSets();
   }, []);
 
   // Lọc theo searchQuery
-  const filteredList = vocabList.filter((v) =>
+  const filteredList = deletedList.filter((v) =>
     v.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -47,23 +47,20 @@ const ListPage: React.FC = () => {
   const totalItems = filteredList.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  // Lấy danh sách để hiển thị ở trang hiện tại
+  // Lấy danh sách để hiển thị trang hiện tại
   const paginatedList = filteredList.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const handleAddNew = () => {
-    navigate("/admin/admin-vocab/add-page");
-  };
-
-  // Xoá mềm (setApi.deleteSet sẽ gắn token Authorization, backend tự biết userId)
-  const handleDeleteSet = async (id: string) => {
+  // Khôi phục set (backend sẽ lấy userId từ token)
+  const handleRestoreSet = async (id: string) => {
     try {
-      await setApi.deleteSet(id);
-      setVocabList((prev) => prev.filter((s) => s.id !== id));
+      await setApi.restoreSet(id);
+      // Loại set vừa restore khỏi danh sách local
+      setDeletedList((prev) => prev.filter((s) => s.id !== id));
     } catch (error) {
-      alert("Xoá thất bại. Vui lòng thử lại.");
+      alert("Khôi phục thất bại. Vui lòng thử lại.");
       console.error(error);
     }
   };
@@ -71,19 +68,18 @@ const ListPage: React.FC = () => {
   return (
     <div className="vocab-container">
       <div className="vocab-tab bg-[rgba(169,201,227,0.23)] min-h-screen">
-        {/* Header & Thêm mới */}
+        {/* Header */}
         <div className="top-vocab p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <h2 className="text-3xl font-bold text-blue-900">
-              Danh sách chủ đề hiện có
-            </h2>
             <button
-              onClick={handleAddNew}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-700 transition"
+              onClick={() => navigate("/admin/admin-vocab/list-page")}
+              className="text-blue-600 hover:text-blue-800"
             >
-              <Plus size={20} />
-              <span>Thêm mới</span>
+              <ArrowLeftCircle size={24} />
             </button>
+            <h2 className="text-3xl font-bold text-blue-900">
+              Bộ từ đã xóa
+            </h2>
           </div>
 
           {/* Search */}
@@ -133,8 +129,8 @@ const ListPage: React.FC = () => {
                 wordsCount={vocab.wordCount}
                 version={vocab.version}
                 searchQuery={searchQuery}
-                isDeleted={false}
-                onDelete={handleDeleteSet}
+                isDeleted={true}
+                onRestore={handleRestoreSet}
                 onDetailClick={(id) =>
                   navigate(`/admin/admin-vocab/update-page/${id}`)
                 }
@@ -142,7 +138,7 @@ const ListPage: React.FC = () => {
             ))
           ) : (
             <p className="text-center text-gray-500 col-span-full">
-              Không tìm thấy danh sách từ vựng nào.
+              Không tìm thấy bộ từ nào đã xóa.
             </p>
           )}
         </div>
@@ -163,4 +159,4 @@ const ListPage: React.FC = () => {
   );
 };
 
-export default ListPage;
+export default DeletedPage;
