@@ -65,10 +65,15 @@ const LoginPage = () => {
 
         <button
           className="w-full bg-indigo-400 text-white rounded-full py-2 text-sm font-semibold hover:bg-indigo-500 transition-colors"
-          onClick={() => navigate("/user")} // Thay '/dashboard' bằng route đích của anh
+          onClick={() => navigate("/user")}
         >
           Login
         </button>
+        <div className="text-right text-xs text-blue-600 font-semibold mb-4 pt-3">
+          <Link to="/forgot-password" className="hover:underline">
+            Forgot Password?
+          </Link>
+        </div>
 
         <div className="flex items-center my-6 text-gray-500 text-xs font-semibold">
           <hr className="flex-grow border-gray-300" />

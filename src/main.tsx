@@ -38,12 +38,16 @@ import SignUpPage from "./pages/Auth/SignUp";
 import StatisticPage from "./pages/User/Statictic";
 import AdminStatisticPage from "./pages/Admin/Statistic";
 import UserDetailsPage from "./pages/Admin/User";
+import ForgotPasswordPage from "./pages/Auth/Forgot";
+import ResetPasswordPage from "./pages/Auth/Reset";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Router>
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset" element={<ResetPasswordPage />} />
 
         {/* Layout có Navbar */}
         <Route path="/user" element={<User />}>
