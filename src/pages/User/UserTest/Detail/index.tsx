@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 type Question = {
   id: number;
@@ -121,7 +121,7 @@ Lunch is not provided, so be sure to pack something for yourself. After the meet
 
 const UserTestDetailPage = () => {
   const { id } = useParams();
-
+  const navigate = useNavigate(); // Khởi tạo useNavigate
   const [currentPart, setCurrentPart] = useState(1);
   const [answers, setAnswers] = useState<{ [questionId: number]: number }>({});
   const [timeLeft, setTimeLeft] = useState(30 * 60);
@@ -183,7 +183,7 @@ const UserTestDetailPage = () => {
 
   const handleConfirmSubmit = () => {
     setModalType(null);
-    alert("Bài thi đã được nộp!"); // Thay bằng logic gửi bài
+    navigate(`/user/test/result/${id}`);
   };
 
   const handleCancelSubmit = () => {

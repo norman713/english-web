@@ -29,6 +29,10 @@ import UpdatePage from "./pages/Admin/AdminVocab/UpdatePage";
 import UserTestPage from "./pages/User/UserTest/ListTest";
 import UserTestDetailPage from "./pages/User/UserTest/Detail";
 import OverallTestPage from "./pages/User/UserTest/Overall";
+import UserTestResultPage from "./pages/User/UserTest/Result";
+import Part1Detail from "./pages/User/UserTest/Result/Part1";
+import Part2Detail from "./pages/User/UserTest/Result/Part2";
+import Part3Detail from "./pages/User/UserTest/Result/Part3";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Router>
@@ -56,6 +60,10 @@ createRoot(document.getElementById("root")!).render(
             <Route index element={<UserTestPage />} />
             <Route path=":id" element={<UserTestDetailPage />} />
             <Route path="overall/:id" element={<OverallTestPage />} />
+            <Route path="result/:id" element={<UserTestResultPage />} />
+            <Route path="part1/detail/:questionId" element={<Part1Detail />} />
+            <Route path="part2/detail/:questionId" element={<Part2Detail />} />
+            <Route path="part3/detail/:questionId" element={<Part3Detail />} />
           </Route>
         </Route>
 
