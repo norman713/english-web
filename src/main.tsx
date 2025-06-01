@@ -35,6 +35,7 @@ import Part2Detail from "./pages/User/UserTest/Result/Part2";
 import Part3Detail from "./pages/User/UserTest/Result/Part3";
 import LoginPage from "./pages/Auth/Login";
 import SignUpPage from "./pages/Auth/SignUp";
+import StatisticPage from "./pages/User/Statictic";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Router>
@@ -68,6 +69,8 @@ createRoot(document.getElementById("root")!).render(
             <Route path="part2/detail/:questionId" element={<Part2Detail />} />
             <Route path="part3/detail/:questionId" element={<Part3Detail />} />
           </Route>
+          {/* Statistic routes */}
+          <Route path="statistic" element={<StatisticPage />} />
         </Route>
 
         <Route path="/admin" element={<Admin />}>

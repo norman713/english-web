@@ -83,7 +83,7 @@ const Navbar = ({ activeTab, userType }: NavbarProps) => {
                 Test
               </Link>
               <Link
-                to="/admin/statistic"
+                to="/user/statistic"
                 className={`nav-link ${getNavLinkColor("statistic")}`}
               >
                 Statistic
