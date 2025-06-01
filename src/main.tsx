@@ -33,11 +33,14 @@ import UserTestResultPage from "./pages/User/UserTest/Result";
 import Part1Detail from "./pages/User/UserTest/Result/Part1";
 import Part2Detail from "./pages/User/UserTest/Result/Part2";
 import Part3Detail from "./pages/User/UserTest/Result/Part3";
+import LoginPage from "./pages/Auth/Login";
+import SignUpPage from "./pages/Auth/SignUp";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
 
         {/* Layout có Navbar */}
         <Route path="/user" element={<User />}>
