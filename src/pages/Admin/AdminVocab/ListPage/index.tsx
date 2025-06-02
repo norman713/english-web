@@ -6,6 +6,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import setApi, { VocabSet } from "../../../../api/setApi";
 import Pagination from "../../../../components/Pagination";
+import AdminVocabTab from "../../../../components/AdminVocabSet";
 
 const ListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -124,6 +125,16 @@ const ListPage: React.FC = () => {
 
         {/* Danh sách card */}
         <div className="vocab-list p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mx-10">
+          <AdminVocabTab
+            title="Từ vựng chủ đề giao tiếp hằng ngày"
+            wordsCount={100}
+            version="1.0"
+            isDeleted={false}
+            onDelete={() => console.log("Xoá bộ từ")}
+            onRestore={() => console.log("Khôi phục bộ từ")}
+            onDetailClick={() => console.log("Chi tiết bộ từ")}
+          />
+
           {isLoading ? (
             // Placeholder khi loading
             [...Array(itemsPerPage)].map((_, index) => (
@@ -141,9 +152,9 @@ const ListPage: React.FC = () => {
                 wordsCount={vocab.wordCount}
                 version={vocab.version}
                 searchQuery={searchQuery}
-                isDeleted={false}             // trang này chỉ chứa những set chưa bị xoá
-                isAdmin={true}                // <--- chỉ định quyền Admin
-                onDelete={handleDeleteSet}    // <--- callback xóa
+                isDeleted={false} // trang này chỉ chứa những set chưa bị xoá
+                isAdmin={true} // <--- chỉ định quyền Admin
+                onDelete={handleDeleteSet} // <--- callback xóa
                 onDetailClick={(id) =>
                   navigate(`/admin/admin-vocab/update-page/${id}`)
                 }
