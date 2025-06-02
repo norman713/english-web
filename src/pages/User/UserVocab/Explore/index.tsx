@@ -57,11 +57,25 @@ const Explore: React.FC = () => {
     currentPage * itemsPerPage
   );
 
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
+
+  const handleAddFavorite = (id: string) => {
+    setFavoriteIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id); // Bấm lại thì bỏ yêu thích
+        alert("Đã hủy thêm vào bộ yêu thích!");
+      } else {
+        newSet.add(id); // Thêm yêu thích
+        alert("Đã thêm vào bộ yêu thích!");
+      }
+      return newSet;
+    });
+  };
+
   return (
     <div className="vocab-container">
       <div className="vocab-tab bg-[rgba(169,201,227,0.23)] min-h-screen">
-
-
         {/* Thanh công cụ */}
         <div className="top-vocab p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <h2 className="text-3xl font-bold text-blue-900">Danh sách bộ từ</h2>
@@ -73,7 +87,10 @@ const Explore: React.FC = () => {
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
                 d="M11 4a7 7 0 100 14 7 7 0 000-14zm10 10l-4-4"
               />
             </svg>
@@ -94,19 +111,39 @@ const Explore: React.FC = () => {
         <div className="vocab-list p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mx-10">
           {isLoading ? (
             [...Array(itemsPerPage)].map((_, idx) => (
-              <div key={idx} className="h-48 bg-gray-200 rounded-lg animate-pulse"></div>
+              <div
+                key={idx}
+                className="h-48 bg-gray-200 rounded-lg animate-pulse"
+              ></div>
             ))
           ) : paginatedList.length > 0 ? (
-            paginatedList.map((vocab, idx) => (
-              <VocabSetCard
-                key={idx}
-                id={vocab.id}
-                title={vocab.name}
-                wordsCount={vocab.wordCount}
-                searchQuery={searchQuery}
-                onDetailClick={(id) => navigate(`/user/learn/${id}`)}
-              />
-            ))
+            paginatedList.map((vocab, idx) => {
+              const isFavorited = favoriteIds.has(vocab.id);
+
+              return (
+                <div key={idx} className="flex flex-col">
+                  <VocabSetCard
+                    id={vocab.id}
+                    title={vocab.name}
+                    wordsCount={vocab.wordCount}
+                    searchQuery={searchQuery}
+                    onDetailClick={(id) => navigate(`/user/learn/${id}`)}
+                  />
+                  <button
+                    onClick={() => handleAddFavorite(vocab.id)}
+                    className={`mt-2 py-2 rounded font-medium transition ${
+                      favoriteIds.has(vocab.id)
+                        ? "bg-green-400 text-white hover:bg-green-500"
+                        : "bg-yellow-400 text-black hover:bg-yellow-500"
+                    }`}
+                  >
+                    {favoriteIds.has(vocab.id)
+                      ? "Đã yêu thích"
+                      : "Thêm vào bộ yêu thích"}
+                  </button>
+                </div>
+              );
+            })
           ) : (
             <p className="text-center text-gray-500 col-span-full">
               Không tìm thấy danh sách từ vựng nào.
