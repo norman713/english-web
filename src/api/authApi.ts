@@ -122,15 +122,19 @@ const authApi = {
     const response = await axiosClient.get<IsAccountRegisteredResponse>(url);
     return response.data;
   },
-
-  // 2.7 POST /api/auth/send-verification-email
-  async sendVerificationEmail(
-    payload: SendVerificationEmailRequest
-  ): Promise<ActionResponse> {
-    const url = "/api/auth/send-verification-email";
-    const response = await axiosClient.post<ActionResponse>(url, payload);
+    async sendResetCode(email: string): Promise<ActionResponse> {
+    const url = `/api/auth/reset?email=${encodeURIComponent(email)}`;
+    const response = await axiosClient.get<ActionResponse>(url);
     return response.data;
   },
+  // 2.7 POST /api/auth/reset
+ // Nếu endpoint thực sự là GET /api/auth/reset?email=...
+async sendVerificationEmail(email: string): Promise<ActionResponse> {
+  const url = `/api/auth/reset?email=${encodeURIComponent(email)}`;
+  const response = await axiosClient.get<ActionResponse>(url);
+  return response.data;
+}
+,
 
   // 2.8 POST /api/auth/register-prov (đăng ký OAuth)
   async registerWithProvider(
@@ -141,11 +145,11 @@ const authApi = {
     return response.data;
   },
 
-  // 2.9 POST /api/auth/reset-password
+  // 2.9 POST /api/auth/reset
   async resetPassword(
     payload: ResetPasswordRequest
   ): Promise<ActionResponse> {
-    const url = "/api/auth/reset-password";
+    const url = "/api/auth/reset";
     const response = await axiosClient.post<ActionResponse>(url, payload);
     return response.data;
   },

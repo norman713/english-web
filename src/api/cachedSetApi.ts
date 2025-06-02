@@ -3,17 +3,14 @@
 import axiosClient from "./axiosClient";
 
 /**
- * Interface cho mỗi mục trả về từ GET /api/cached-sets
- * [
- *   {
- *     "setId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
- *     "setName": "string",
- *     "wordCount": 0,
- *     "learnedWords": 0,
- *     "isDeleted": true
- *   },
- *   ...
- * ]
+ * Each item returned from GET /api/cached-sets
+ * {
+ *   setId: string;       // ID of the vocabulary set
+ *   setName: string;     // Name of the set
+ *   wordCount: number;   // Total number of words in the set
+ *   learnedWords: number;// Number of words the user has learned in this set
+ *   isDeleted: boolean;  // Whether the set has been deleted
+ * }
  */
 export interface CachedSetItem {
   setId: string;
@@ -22,18 +19,35 @@ export interface CachedSetItem {
   learnedWords: number;
   isDeleted: boolean;
 }
+export interface CacheResponse {
+  message: string;
+  data: CachedSetItem;
+}
 
-const cachedSetApi = {
-  /**
-   * GET /api/cached-sets
-   * Trả về mảng CachedSetItem[]
-   */
-  async getAllCachedSets(): Promise<CachedSetItem[]> {
-    const response = await axiosClient.get<CachedSetItem[]>(
-      `/api/cached-sets`
-    );
-    return response.data;
-  },
+/**
+ * GET /api/cached-sets
+ * Response body: CachedSetItem[]
+ */
+export async function getCachedSets(): Promise<CachedSetItem[]> {
+  const response = await axiosClient.get<CachedSetItem[]>("​/api/cached-sets");
+  return response.data;
+}
+
+export async function saveCachedSet(params: {
+  setId: string;
+  learnedWords: number;
+}): Promise<CacheResponse> {
+  const response = await axiosClient.post<CacheResponse>(
+    `/api/cached-sets`,
+    {
+      setId: params.setId,
+      learnedWords: params.learnedWords,
+    }
+  );
+  return response.data;
+}
+
+export default {
+  getCachedSets,
+  saveCachedSet,
 };
-
-export default cachedSetApi;

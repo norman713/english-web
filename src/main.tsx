@@ -40,6 +40,7 @@ import UserDetailsPage from "./pages/Admin/User";
 import ForgotPasswordPage from "./pages/Auth/Forgot";
 import ResetPasswordPage from "./pages/Auth/Reset";
 import DeletedPage from "./pages/Admin/AdminVocab/DeletedPage";
+import DeletedVocabPage from "./pages/User/VocabSetCardDetails/DeletedPage";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Router>
@@ -64,6 +65,7 @@ createRoot(document.getElementById("root")!).render(
           {/* VocabSetCardDetails as a parent route with outlet */}
           <Route path="learn/:setId" element={<VocabSetCardDetails />}>
             <Route index element={<FlashCardSet />} />
+            <Route path="soft-deleted" element={<DeletedVocabPage />} />
             <Route path="flashcard" element={<FlashcardsPage />} />
           </Route>
 

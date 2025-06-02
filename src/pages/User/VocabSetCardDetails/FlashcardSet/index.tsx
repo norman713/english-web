@@ -1,12 +1,14 @@
+// src/pages/User/UserVocab/FlashCardSet.tsx
+
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import setApi from "../../../../api/setApi";
-import { VocabSet, VocabWord } from "../../../../api/setApi";
+import axios from "axios";
+import setApi, { VocabSet, VocabWord } from "../../../../api/setApi";
+import savedSetApi from "../../../../api/savedSetApi";
 
-
-const FlashCardSet = () => {
+const FlashCardSet: React.FC = () => {
   const navigate = useNavigate();
-  const { setId } = useParams();
+  const { setId } = useParams<{ setId: string }>();
   const [currentPage, setCurrentPage] = useState(1);
   const [vocabularySet, setVocabularySet] = useState<VocabSet | null>(null);
   const [vocabularyWords, setVocabularyWords] = useState<VocabWord[]>([]);
@@ -15,30 +17,58 @@ const FlashCardSet = () => {
 
   const itemsPerPage = 4;
 
-  const fetchSetData = useCallback(async (page: number) => {
-    if (!setId) return;
-    setIsLoading(true);
-    try {
-      const setDetails = await setApi.getSetById(setId);
-      const wordsData = await setApi.getWordsBySetId(setId, page, itemsPerPage);
-      setVocabularySet(setDetails);
-      setVocabularyWords(wordsData.words);
-      setTotalPages(wordsData.totalPages);
-    } catch (error) {
-      console.error("Lỗi khi tải dữ liệu:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [setId, itemsPerPage]);
+  const fetchSetData = useCallback(
+    async (page: number) => {
+      if (!setId) return;
+      setIsLoading(true);
+      try {
+        const setDetails = await setApi.getSetById(setId);
+        const wordsData = await setApi.getWordsBySetId(
+          setId,
+          page,
+          itemsPerPage
+        );
+        setVocabularySet(setDetails);
+        setVocabularyWords(wordsData.words);
+        setTotalPages(wordsData.totalPages);
+      } catch (error) {
+        console.error("Lỗi khi tải dữ liệu:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [setId]
+  );
 
   useEffect(() => {
     fetchSetData(currentPage);
   }, [fetchSetData, currentPage]);
 
-  const handlePracticeNow = () => {
-    if (setId) {
-      navigate(`/user/learn/${setId}/flashcard`);
+  const handlePracticeNow = async () => {
+    if (!setId) return;
+
+    try {
+      // 1) Mark this set as “saved/learning” on the server.
+      await savedSetApi.saveSet(setId);
+    } catch (err) {
+      // Now `err` is unknown, so we narrow using axios
+      if (
+        axios.isAxiosError(err) &&
+        err.response?.data?.message &&
+        (err.response.data as { message: string }).message.includes(
+          "This set has been saved"
+        )
+      ) {
+        // already saved → ignore
+      } else {
+        console.error("Không thể lưu bộ từ:", err);
+        alert("Không thể đặt trạng thái “learning”. Vui lòng thử lại.");
+        return;
+      }
     }
+
+    // 2) After saving/marking as learning, navigate into flashcards
+    navigate(`/user/learn/${setId}/flashcard`);
   };
 
   const handlePrevPage = () => {
@@ -55,7 +85,9 @@ const FlashCardSet = () => {
         {/* Title & Button */}
         <div className="text-center mb-10">
           <h1 className="text-5xl font-bold text-blue-900 mb-6">
-            {vocabularySet?.name||isLoading || "Đang tải..."}
+            {isLoading
+              ? "Đang tải..."
+              : vocabularySet?.name || "Tên bộ từ không khả dụng"}
           </h1>
           <button
             onClick={handlePracticeNow}
@@ -86,7 +118,10 @@ const FlashCardSet = () => {
                   <h3 className="font-bold text-gray-800 text-2xl mb-2">
                     {word.word}
                     {word.pronunciation && (
-                      <span className="text-blue-500"> / {word.pronunciation}</span>
+                      <span className="text-blue-500">
+                        {" "}
+                        / {word.pronunciation}
+                      </span>
                     )}
                   </h3>
                   <p className="text-gray-600 text-lg">
@@ -99,7 +134,7 @@ const FlashCardSet = () => {
                   )}
                 </div>
               </div>
-              <div className="w-1/2 items-center justify-center ml-6">
+              <div className="w-1/2 flex items-center justify-center ml-6">
                 <img
                   src={word.imageUrl}
                   alt={word.word}
@@ -116,7 +151,9 @@ const FlashCardSet = () => {
             onClick={handlePrevPage}
             disabled={currentPage === 1}
             className={`text-gray-500 text-2xl ${
-              currentPage === 1 ? "opacity-50 cursor-not-allowed" : "hover:text-blue-600"
+              currentPage === 1
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:text-blue-600"
             }`}
           >
             &lt;
@@ -140,7 +177,9 @@ const FlashCardSet = () => {
             onClick={handleNextPage}
             disabled={currentPage === totalPages}
             className={`text-gray-500 text-2xl ${
-              currentPage === totalPages ? "opacity-50 cursor-not-allowed" : "hover:text-blue-600"
+              currentPage === totalPages
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:text-blue-600"
             }`}
           >
             &gt;

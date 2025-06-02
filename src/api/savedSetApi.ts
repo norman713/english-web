@@ -1,4 +1,5 @@
 // src/api/savedSetApi.ts
+
 import axiosClient from "./axiosClient";
 
 /**
@@ -54,13 +55,16 @@ export interface SavedSetsState {
 const savedSetApi = {
   /**
    * POST /api/saved-sets
-   * Save một bộ từ cho user hiện tại. Body: { setId: string }
+   * Save một bộ từ cho user hiện tại. Body: { setId: string, learnedWords?: number }
    * Trả về SavedSetItem mới tạo.
    */
-  async saveSet(setId: string): Promise<SavedSetItem> {
+  async saveSet(
+    setId: string,
+    learnedWords: number = 0
+  ): Promise<SavedSetItem> {
     const response = await axiosClient.post<SavedSetItem>(
       `/api/saved-sets`,
-      { setId }
+      { setId, learnedWords }
     );
     return response.data;
   },
@@ -71,6 +75,22 @@ const savedSetApi = {
    */
   async deleteSavedSet(savedSetId: string): Promise<void> {
     await axiosClient.delete(`/api/saved-sets/${savedSetId}`);
+  },
+
+  /**
+   * PATCH /api/saved-sets/{id}
+   * Cập nhật số learnedWords của SavedSet.
+   * Body: { learnedWords: number }
+   */
+  async updateSavedSet(
+    savedSetId: string,
+    learnedWords: number
+  ): Promise<SavedSetItem> {
+    const response = await axiosClient.patch<SavedSetItem>(
+      `/api/saved-sets/${savedSetId}`,
+      { learnedWords }
+    );
+    return response.data;
   },
 
   /**

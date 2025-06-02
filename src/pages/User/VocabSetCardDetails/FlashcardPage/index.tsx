@@ -1,34 +1,43 @@
+// src/pages/User/VocabSetCardDetails/FlashcardPage/index.tsx
+
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, RotateCw } from "lucide-react";
+import { AxiosError } from "axios";
+
 import setApi, { VocabWord } from "../../../../api/setApi";
+import cachedSetApi from "../../../../api/cachedSetApi";
 import studentImage from "/src/assets/student.png";
 
-const FlashCardPage = () => {
+const FlashCardPage: React.FC = () => {
   const navigate = useNavigate();
   const { setId } = useParams<{ setId: string }>();
 
-  // chỉ cần list từ vựng và trạng thái loading
   const [vocabWords, setVocabWords] = useState<VocabWord[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // flashcard state
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [flipped, setFlipped] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [flipped, setFlipped] = useState<boolean>(false);
+  const [isAnimating, setIsAnimating] = useState<boolean>(false);
 
-  // fetch once khi setId thay đổi
+  // 1) Load all words when setId changes
   useEffect(() => {
     if (!setId) return;
     setIsLoading(true);
     setApi
-      .getWordsBySetId(setId, 1, 1000) // page=1, size lớn để lấy đủ
-      .then((data) => setVocabWords(data.words))
-      .catch((err) => console.error("Lỗi fetch words:", err))
-      .finally(() => setIsLoading(false));
+      .getWordsBySetId(setId, 1, 1000)
+      .then((data) => {
+        setVocabWords(data.words);
+      })
+      .catch((err: unknown) => {
+        console.error("Lỗi fetch words:", err);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, [setId]);
 
-  // handle loading / empty
+  // 2) Show loading or “no words”
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -47,7 +56,7 @@ const FlashCardPage = () => {
   const totalCards = vocabWords.length;
   const currentCard = vocabWords[currentIndex];
 
-  // chuyển slide & flip
+  // 3) Slide animation helpers
   const flipAndChangeCard = (newIndex: number) => {
     setIsAnimating(true);
     setFlipped(false);
@@ -56,10 +65,42 @@ const FlashCardPage = () => {
       setIsAnimating(false);
     }, 200);
   };
-  const handleNext = () => currentIndex < totalCards - 1 && flipAndChangeCard(currentIndex + 1);
-  const handlePrev = () => currentIndex > 0 && flipAndChangeCard(currentIndex - 1);
-  const handleFlip = () => !isAnimating && setFlipped((f) => !f);
+  const handleNext = () => {
+    if (currentIndex < totalCards - 1) {
+      flipAndChangeCard(currentIndex + 1);
+    }
+  };
+  const handlePrev = () => {
+    if (currentIndex > 0) {
+      flipAndChangeCard(currentIndex - 1);
+    }
+  };
 
+  // 4) Flips the card; if it’s the very last card, cache it
+  const handleFlip = async (): Promise<void> => {
+    if (isAnimating) return;
+    const newFlipped = !flipped;
+    setFlipped(newFlipped);
+
+    if (newFlipped && currentIndex === totalCards - 1 && setId) {
+      try {
+        // learnedWords = totalCards
+        await cachedSetApi.saveCachedSet({ setId, learnedWords: totalCards });
+        alert("Đã lưu bộ từ vào cache!");
+      } catch (err: unknown) {
+        // Narrow to AxiosError if possible
+        if (err instanceof AxiosError) {
+          const message = (err.response?.data as { message?: string })?.message ?? "";
+          // ignore “already saved” errors, but log anything else
+          if (!message.includes("already")) {
+            console.error("Lỗi khi cache set:", err);
+          }
+        } else {
+          console.error("Lỗi khi cache set:", err);
+        }
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
@@ -85,7 +126,10 @@ const FlashCardPage = () => {
           ${isAnimating ? "opacity-0 scale-95" : "opacity-100 scale-100"}
           bg-[#D2F0FA]
         `}
-        onClick={handleFlip}
+        onClick={() => {
+          // Always append a .catch here so any throw inside handleFlip is caught
+          handleFlip().catch((e) => console.error(e));
+        }}
       >
         {!flipped ? (
           <div className="h-full flex flex-col items-center justify-center p-8">
@@ -93,10 +137,14 @@ const FlashCardPage = () => {
               {currentCard.word}
             </h2>
             {currentCard.pronunciation && (
-              <p className="text-2xl text-blue-600 mb-4">{currentCard.pronunciation}</p>
+              <p className="text-2xl text-blue-600 mb-4">
+                {currentCard.pronunciation}
+              </p>
             )}
             {currentCard.example && (
-              <p className="text-xl text-gray-700 text-center">{currentCard.example}</p>
+              <p className="text-xl text-gray-700 text-center">
+                {currentCard.example}
+              </p>
             )}
             <p className="mt-8 text-sm text-gray-500">
               Nhấn vào thẻ hoặc phím space/enter để xem nghĩa và ảnh
@@ -135,7 +183,9 @@ const FlashCardPage = () => {
           <ArrowLeft size={24} />
         </button>
         <button
-          onClick={handleFlip}
+          onClick={() => {
+            handleFlip().catch((e) => console.error(e));
+          }}
           className="p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700"
         >
           <RotateCw size={24} />

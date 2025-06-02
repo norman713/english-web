@@ -1,7 +1,10 @@
+// src/components/UserSetCard.tsx
+
 import React from "react";
 import { FileText, XCircle, CheckCircle2, Clock, Heart } from "lucide-react";
 
-interface UserVocabTabProps {
+interface UserSetCardProps {
+  id?: string;
   title: string;
   wordsCount: number;
   learnedWords?: number;
@@ -13,7 +16,7 @@ interface UserVocabTabProps {
   onAddFavorite?: () => void;
 }
 
-const UserVocabTab: React.FC<UserVocabTabProps> = ({
+const UserSetCard: React.FC<UserSetCardProps> = ({
   title,
   wordsCount,
   learnedWords = 0,
@@ -24,52 +27,64 @@ const UserVocabTab: React.FC<UserVocabTabProps> = ({
   onStartLearning,
   onAddFavorite,
 }) => {
+  // Màu nền
   let bgColor = "bg-[#D0E7F6]";
-  let statusElement = null;
-  let buttonText = "Chi tiết";
-  let buttonHandler = onDetailClick;
-
   if (isDeleted) {
     bgColor = "bg-red-300";
+  } else if (!isFavorited) {
+    // nếu chưa "favorited" và chưa xóa thì màu nền xanh nhạt
+    bgColor = "bg-blue-100";
+  }
+
+  // Phần status ở giữa
+  let statusElement = null;
+  if (isDeleted) {
     statusElement = (
       <div className="flex items-center gap-1 text-red-700 font-semibold mb-2">
         <XCircle size={16} />
         Đã bị xoá
       </div>
     );
-    buttonText = "Bắt đầu";
-    buttonHandler = onDetailClick;
   } else if (isCompleted) {
-    bgColor = "bg-[#D0E7F6]";
     statusElement = (
       <div className="flex items-center gap-1 text-green-500 font-semibold mb-2">
         <CheckCircle2 size={16} />
         Đã hoàn thành
       </div>
     );
-    buttonText = "Xem lại";
-    buttonHandler = onDetailClick;
   } else if (learnedWords > 0) {
-    bgColor = "bg-[#D0E7F6]";
     statusElement = (
       <div className="flex items-center gap-1 text-gray-700 font-semibold mb-2">
         <Clock size={16} />
         Đã học: {learnedWords}
       </div>
     );
+  }
+
+  // Xác định văn bản & handler của nút cuối
+  let buttonText = "Chi tiết";
+  let buttonHandler = onDetailClick;
+
+  if (isDeleted) {
+    buttonText = "Bắt đầu";
+    buttonHandler = onDetailClick;
+  } else if (isFavorited) {
+    buttonText = "Bỏ yêu thích";
+    buttonHandler = onAddFavorite;
+  } else if (learnedWords > 0) {
     buttonText = "Học tiếp";
     buttonHandler = onStartLearning;
-  } else if (!isFavorited) {
-    bgColor = "bg-blue-100";
+  } else {
+    // vẫn giữ "Chi tiết"
     buttonText = "Chi tiết";
     buttonHandler = onDetailClick;
   }
 
   return (
     <div
-      className={`${bgColor} rounded-lg p-4 w-[250px] flex flex-col items-center shadow-md relative`}
+      className={`${bgColor} rounded-lg p-4 w-[300px] flex flex-col items-center shadow-md relative`}
     >
-      {/* Icon trái tim hàng đầu */}
+      {/* Icon trái tim góc trên */}
       <div className="w-full flex justify-end mb-2">
         {onAddFavorite && (
           <button
@@ -77,8 +92,8 @@ const UserVocabTab: React.FC<UserVocabTabProps> = ({
               e.stopPropagation();
               onAddFavorite();
             }}
-            className={`mb-2 cursor-pointer transition-colors ${
-              isFavorited ? "text-red-600" : "text-gray-400 hover:text-red-600"
+            className={`cursor-pointer transition-colors ${
+              isFavorited ? "text-red-600" : "text-gray-500 hover:text-red-600"
             }`}
             title={isFavorited ? "Đã yêu thích" : "Thêm vào yêu thích"}
             aria-label="Toggle favorite"
@@ -88,23 +103,24 @@ const UserVocabTab: React.FC<UserVocabTabProps> = ({
         )}
       </div>
 
-      {/* Tiêu đề hàng 2 */}
-      <div className="font-bold text-[20px] mb-4 leading-snug text-start w-full">
+      {/* Tiêu đề */}
+      <div className="font-bold text-gray-900 text-[25px] mb-4 leading-snug text-start w-full">
         {title}
       </div>
 
-      {/* Nội dung còn lại */}
+      {/* Nội dung: số từ và status */}
       <div className="py-3 w-full">
-        <div className="flex items-center gap-1 text-gray-700 mb-2">
-          <FileText size={16} />
+        <div className="flex items-center gap-1 font-bold text-[20px] text-gray-500 mb-2">
+          <FileText size={20} />
           <span>{wordsCount} từ</span>
         </div>
         {statusElement}
       </div>
 
+      {/* Nút cuối */}
       <button
         onClick={buttonHandler}
-        className="mt-auto px-4 py-1 w-full rounded bg-white text-blue-500 font-semibold hover:bg-blue-200 transition"
+        className={`mt-auto px-4 py-1 w-full rounded bg-white text-blue-500 font-semibold hover:bg-blue-200 transition`}
       >
         {buttonText}
       </button>
@@ -112,4 +128,4 @@ const UserVocabTab: React.FC<UserVocabTabProps> = ({
   );
 };
 
-export default UserVocabTab;
+export default UserSetCard;

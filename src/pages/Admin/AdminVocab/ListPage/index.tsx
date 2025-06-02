@@ -1,12 +1,11 @@
 // src/pages/Admin/AdminVocab/ListPage/index.tsx
 
 import React, { useEffect, useState } from "react";
-import VocabSetCard from "../../../../components/VocabSetCard";
+import AdminSetCard from "../../../../components/AdminSetCard";
 import { Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import setApi, { VocabSet } from "../../../../api/setApi";
 import Pagination from "../../../../components/Pagination";
-import AdminVocabTab from "../../../../components/AdminVocabSet";
 
 const ListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -16,7 +15,8 @@ const ListPage: React.FC = () => {
   const [vocabList, setVocabList] = useState<VocabSet[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const itemsPerPage = 8;
+  // Mỗi trang hiển thị 6 thẻ (2 hàng × 3 cột)
+  const itemsPerPage = 6;
 
   // 1. Fetch toàn bộ set chưa xóa
   useEffect(() => {
@@ -57,7 +57,7 @@ const ListPage: React.FC = () => {
     navigate("/admin/admin-vocab/add-page");
   };
 
-  // 5. Xoá mềm
+  // 5. Xóa mềm
   const handleDeleteSet = async (id: string) => {
     try {
       await setApi.deleteSet(id);
@@ -124,48 +124,40 @@ const ListPage: React.FC = () => {
         </div>
 
         {/* Danh sách card */}
-        <div className="vocab-list p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mx-10">
-          <AdminVocabTab
-            title="Từ vựng chủ đề giao tiếp hằng ngày"
-            wordsCount={100}
-            version="1.0"
-            isDeleted={false}
-            onDelete={() => console.log("Xoá bộ từ")}
-            onRestore={() => console.log("Khôi phục bộ từ")}
-            onDetailClick={() => console.log("Chi tiết bộ từ")}
-          />
-
-          {isLoading ? (
-            // Placeholder khi loading
-            [...Array(itemsPerPage)].map((_, index) => (
+        {isLoading ? (
+          // Placeholder khi loading
+          <div className="grid grid-cols-3 gap-2.5 p-4">
+            {[...Array(itemsPerPage)].map((_, index) => (
               <div
                 key={index}
                 className="h-48 bg-gray-200 rounded-lg animate-pulse"
               />
-            ))
-          ) : paginatedList.length > 0 ? (
-            paginatedList.map((vocab) => (
-              <VocabSetCard
+            ))}
+          </div>
+        ) : paginatedList.length > 0 ? (
+          <div className="grid grid-cols-4 gap-2.5 p-4 mx-10">
+            {paginatedList.map((vocab) => (
+              <AdminSetCard
                 key={vocab.id}
                 id={vocab.id}
                 title={vocab.name}
                 wordsCount={vocab.wordCount}
                 version={vocab.version}
-                searchQuery={searchQuery}
                 isDeleted={false} // trang này chỉ chứa những set chưa bị xoá
-                isAdmin={true} // <--- chỉ định quyền Admin
                 onDelete={handleDeleteSet} // <--- callback xóa
                 onDetailClick={(id) =>
                   navigate(`/admin/admin-vocab/update-page/${id}`)
                 }
               />
-            ))
-          ) : (
-            <p className="text-center text-gray-500 col-span-full">
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-2.5 p-4">
+            <p className="text-center text-gray-500 col-span-3">
               Không tìm thấy danh sách từ vựng nào.
             </p>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Phân trang */}
         {!isLoading && totalPages > 1 && (

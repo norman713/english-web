@@ -1,18 +1,14 @@
 // src/pages/User/UserVocab/MyList/MyList.tsx
 
 import React, { useEffect, useState } from "react";
-import VocabSetCard from "../../../../components/VocabSetCard";
-import savedSetApi, {
-  SavedSetsState,
-  SavedSetItem,
-} from "../../../../api/savedSetApi";
-import StatusTab from "../../../../components/StatusTab";
 import { useNavigate } from "react-router-dom";
+import savedSetApi, { SavedSetsState, SavedSetItem } from "../../../../api/savedSetApi";
+import StatusTab from "../../../../components/StatusTab";
 import Pagination from "../../../../components/Pagination";
-import UserVocabTab from "../../../../components/UserVocabSet";
+import UserSetCard from "../../../../components/UserSetCard";
 
 interface VocabSetForCard {
-  id: string;
+  id: string;          // chính là setId
   name: string;
   wordCount: number;
   learnedWords: number;
@@ -20,9 +16,13 @@ interface VocabSetForCard {
 }
 
 const MyList: React.FC = () => {
+  const navigate = useNavigate();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [vocabList, setVocabList] = useState<VocabSetForCard[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [isLoadingList, setIsLoadingList] = useState(false);
   const [isLoadingStats, setIsLoadingStats] = useState(false);
   const [errorStats, setErrorStats] = useState<string | null>(null);
@@ -34,36 +34,33 @@ const MyList: React.FC = () => {
     learned: 0,
   });
 
-  const navigate = useNavigate();
+  // Lưu cả mảng SavedSetItem để có thể truy xuất record ID khi update/delete
+  const [savedSets, setSavedSets] = useState<SavedSetItem[]>([]);
+
   const itemsPerPage = 4;
 
-  // 1. Lấy số liệu cho StatusTab
+  // 1) Khi mount, fetch stats và page=1
   useEffect(() => {
-    const fetchStats = async () => {
+    const initFetch = async () => {
+      // 1a) Fetch thống kê
       setIsLoadingStats(true);
       try {
-        const data = await savedSetApi.getSavedSetsState();
-        setStats(data);
-      } catch (err: unknown) {
+        const statsData = await savedSetApi.getSavedSetsState();
+        setStats(statsData);
+      } catch (err) {
         console.error("Lỗi khi lấy saved-sets state:", err);
-        const message =
-          err instanceof Error ? err.message : "Lỗi không xác định";
+        const message = err instanceof Error ? err.message : "Lỗi không xác định";
         setErrorStats(message);
       } finally {
         setIsLoadingStats(false);
       }
-    };
-    fetchStats();
-  }, []);
 
-  // 2. Lấy danh sách saved sets
-  useEffect(() => {
-    const fetchSavedSets = async () => {
+      // 1b) Fetch saved-sets page 1
       setIsLoadingList(true);
       try {
-        const response = await savedSetApi.getSavedSets(1, 9999);
-        const savedItems: SavedSetItem[] = response.sets;
-        const mappedList: VocabSetForCard[] = savedItems.map((item) => ({
+        const response = await savedSetApi.getSavedSets(1, itemsPerPage);
+        setSavedSets(response.sets);
+        const mappedList: VocabSetForCard[] = response.sets.map((item) => ({
           id: item.setId,
           name: item.setName,
           wordCount: item.wordCount,
@@ -71,27 +68,102 @@ const MyList: React.FC = () => {
           isDeleted: item.isDeleted,
         }));
         setVocabList(mappedList);
-      } catch (err: unknown) {
-        console.error("Lỗi khi lấy danh sách saved sets:", err);
-        const message =
-          err instanceof Error ? err.message : "Lỗi không xác định";
+        setTotalItems(response.totalItems);
+        setTotalPages(response.totalPages);
+      } catch (err) {
+        console.error("Lỗi khi lấy danh sách saved-sets:", err);
+        const message = err instanceof Error ? err.message : "Lỗi không xác định";
         setErrorList(message);
         setVocabList([]);
       } finally {
         setIsLoadingList(false);
       }
     };
-    fetchSavedSets();
+    initFetch();
   }, []);
 
-  // 3. Lọc + phân trang
+  // 2) Khi đổi trang thì fetch lại page đó
+  useEffect(() => {
+    const fetchPage = async () => {
+      setIsLoadingList(true);
+      try {
+        const response = await savedSetApi.getSavedSets(currentPage, itemsPerPage);
+        setSavedSets(response.sets);
+        const mappedList: VocabSetForCard[] = response.sets.map((item) => ({
+          id: item.setId,
+          name: item.setName,
+          wordCount: item.wordCount,
+          learnedWords: item.learnedWords,
+          isDeleted: item.isDeleted,
+        }));
+        setVocabList(mappedList);
+        setTotalItems(response.totalItems);
+        setTotalPages(response.totalPages);
+      } catch (err) {
+        console.error("Lỗi khi lấy saved-sets page:", err);
+        const message = err instanceof Error ? err.message : "Lỗi không xác định";
+        setErrorList(message);
+        setVocabList([]);
+      } finally {
+        setIsLoadingList(false);
+      }
+    };
+    fetchPage();
+  }, [currentPage]);
+
+  // 3) Lọc client-side theo searchQuery
   const filteredList = vocabList.filter((v) =>
     v.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  const paginatedList = filteredList.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+
+  // Handler: điều hướng tới flashcard (normals)
+  const handleDetailClick = (setId: string) => {
+    const target = vocabList.find((v) => v.id === setId);
+    if (target?.isDeleted) {
+      navigate(`/user/learn/${setId}/soft-deleted`);
+      return;
+    }
+    navigate(`/user/learn/${setId}`);
+  };
+
+  // Handler: đánh dấu “learning” nếu chưa xóa, nếu đã xóa thì redirect sang “deleted”
+  const handleStartLearning = async (setId: string) => {
+    // Nếu set đã xóa, chuyển sang trang deleted
+    const target = vocabList.find((v) => v.id === setId);
+    if (target?.isDeleted) {
+      navigate(`/user/learn/${setId}/deleted`);
+      return;
+    }
+
+    // Ngược lại: gọi API PATCH để set learnedWords = 0 (đánh dấu “đang học”)
+    try {
+      const existing = savedSets.find((s) => s.setId === setId);
+      if (!existing) throw new Error("Không tìm thấy item để cập nhật trạng thái học");
+      await savedSetApi.updateSavedSet(existing.id, 0);
+
+      // Refetch stats + danh sách
+      const [newStats, newPage] = await Promise.all([
+        savedSetApi.getSavedSetsState(),
+        savedSetApi.getSavedSets(currentPage, itemsPerPage),
+      ]);
+      setStats(newStats);
+      setSavedSets(newPage.sets);
+
+      const mappedList: VocabSetForCard[] = newPage.sets.map((item) => ({
+        id: item.setId,
+        name: item.setName,
+        wordCount: item.wordCount,
+        learnedWords: item.learnedWords,
+        isDeleted: item.isDeleted,
+      }));
+      setVocabList(mappedList);
+      setTotalItems(newPage.totalItems);
+      setTotalPages(newPage.totalPages);
+    } catch (err) {
+      console.error("Không thể cập nhật trạng thái học:", err);
+      alert("Không thể cập nhật trạng thái. Vui lòng thử lại.");
+    }
+  };
 
   return (
     <div className="vocab-container">
@@ -100,21 +172,9 @@ const MyList: React.FC = () => {
         <div className="flex justify-center items-center gap-[70px] py-[30px] bg-white">
           {isLoadingStats ? (
             <>
-              <StatusTab
-                number={0}
-                text="đang tải..."
-                backgroundColor="bg-gray-100"
-              />
-              <StatusTab
-                number={0}
-                text="đang tải..."
-                backgroundColor="bg-gray-100"
-              />
-              <StatusTab
-                number={0}
-                text="đang tải..."
-                backgroundColor="bg-gray-100"
-              />
+              <StatusTab number={0} text="đang tải..." backgroundColor="bg-gray-100" />
+              <StatusTab number={0} text="đang tải..." backgroundColor="bg-gray-100" />
+              <StatusTab number={0} text="đang tải..." backgroundColor="bg-gray-100" />
             </>
           ) : errorStats ? (
             <>
@@ -125,16 +185,8 @@ const MyList: React.FC = () => {
             </>
           ) : (
             <>
-              <StatusTab
-                number={stats.learned}
-                text="đã học"
-                backgroundColor="bg-[#F3F7FF]"
-              />
-              <StatusTab
-                number={stats.learning}
-                text="đang học"
-                backgroundColor="bg-[#E6F7E6]"
-              />
+              <StatusTab number={stats.learned} text="đã học" backgroundColor="bg-[#F3F7FF]" />
+              <StatusTab number={stats.learning} text="đang học" backgroundColor="bg-[#E6F7E6]" />
               <StatusTab
                 number={stats.notLearned}
                 text="chưa học"
@@ -147,9 +199,7 @@ const MyList: React.FC = () => {
 
         {/* Thanh công cụ Search */}
         <div className="top-vocab p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <h2 className="text-3xl font-bold text-blue-900">
-            Danh sách từ của tôi
-          </h2>
+          <h2 className="text-3xl font-bold text-blue-900">Danh sách từ của tôi</h2>
           <div className="search-container flex items-center border border-blue-300 rounded px-2 w-[373px] bg-white">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -178,42 +228,24 @@ const MyList: React.FC = () => {
           </div>
         </div>
 
-        {/* Danh sách VocabSetCard hoặc lỗi nếu có */}
+        {/* Danh sách UserSetCard */}
         <div className="vocab-list p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mx-10">
-          {/* test user vocab */}
-          <UserVocabTab
-            title="Từ vựng chủ đề giao tiếp hằng ngày"
-            wordsCount={200}
-            learnedWords={0}
-            isDeleted={false}
-            isCompleted={false}
-            isFavorited={true}
-            onDetailClick={() => console.log("Chi tiết clicked")}
-            onStartLearning={() => console.log("Học tiếp clicked")}
-            onAddFavorite={() => console.log("Thêm vào yêu thích!")}
-          />
-
           {isLoadingList ? (
             Array.from({ length: itemsPerPage }).map((_, idx) => (
-              <div
-                key={idx}
-                className="h-48 bg-gray-200 rounded-lg animate-pulse"
-              />
+              <div key={idx} className="h-48 bg-gray-200 rounded-lg animate-pulse" />
             ))
           ) : errorList ? (
-            <p className="text-center text-red-500 col-span-full">
-              {errorList}
-            </p>
-          ) : paginatedList.length > 0 ? (
-            paginatedList.map((vocab) => (
-              <VocabSetCard
+            <p className="text-center text-red-500 col-span-full">{errorList}</p>
+          ) : filteredList.length > 0 ? (
+            filteredList.map((vocab) => (
+              <UserSetCard
                 key={vocab.id}
-                id={vocab.id}
                 title={vocab.name}
                 wordsCount={vocab.wordCount}
                 learnedWords={vocab.learnedWords}
                 isDeleted={vocab.isDeleted}
-                onDetailClick={(id) => navigate(`/user/learn/${id}`)}
+                onDetailClick={() => handleDetailClick(vocab.id)}
+                onStartLearning={() => handleStartLearning(vocab.id)}
               />
             ))
           ) : (
@@ -224,14 +256,16 @@ const MyList: React.FC = () => {
         </div>
 
         {/* Phân trang */}
-        <div className="pagination p-4 text-center">
-          <Pagination
-            totalItems={filteredList.length}
-            itemsPerPage={itemsPerPage}
-            currentPage={currentPage}
-            onPageChange={setCurrentPage}
-          />
-        </div>
+        {!isLoadingList && totalPages > 1 && (
+          <div className="pagination p-4 text-center">
+            <Pagination
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

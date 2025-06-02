@@ -1,11 +1,11 @@
 // src/pages/Admin/AdminVocab/DeletedPage/index.tsx
 
 import React, { useEffect, useState } from "react";
-import VocabSetCard from "../../../../components/VocabSetCard";
 import { useNavigate } from "react-router-dom";
 import setApi, { VocabSet } from "../../../../api/setApi";
 import Pagination from "../../../../components/Pagination";
 import { ArrowLeftCircle } from "lucide-react";
+import AdminSetCard from "../../../../components/AdminSetCard";
 
 const DeletedPage: React.FC = () => {
   const navigate = useNavigate();
@@ -120,13 +120,12 @@ const DeletedPage: React.FC = () => {
             ))
           ) : paginatedList.length > 0 ? (
             paginatedList.map((vocab) => (
-              <VocabSetCard
+              <AdminSetCard
                 key={vocab.id}
                 id={vocab.id}
                 title={vocab.name}
                 wordsCount={vocab.wordCount}
                 version={vocab.version}
-                searchQuery={searchQuery}
                 isDeleted={true}
                 onRestore={handleRestoreSet}
                 onDetailClick={(id) =>
