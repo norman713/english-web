@@ -5,6 +5,7 @@ import VocabSetCard from "../../../../components/VocabSetCard";
 import setApi from "../../../../api/setApi";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../../../../components/Pagination";
+import UserVocabTab from "../../../../components/UserVocabSet";
 
 interface VocabSet {
   id: string;
@@ -60,8 +61,6 @@ const Explore: React.FC = () => {
   return (
     <div className="vocab-container">
       <div className="vocab-tab bg-[rgba(169,201,227,0.23)] min-h-screen">
-
-
         {/* Thanh công cụ */}
         <div className="top-vocab p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <h2 className="text-3xl font-bold text-blue-900">Danh sách bộ từ</h2>
@@ -73,7 +72,10 @@ const Explore: React.FC = () => {
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
                 d="M11 4a7 7 0 100 14 7 7 0 000-14zm10 10l-4-4"
               />
             </svg>
@@ -94,7 +96,10 @@ const Explore: React.FC = () => {
         <div className="vocab-list p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mx-10">
           {isLoading ? (
             [...Array(itemsPerPage)].map((_, idx) => (
-              <div key={idx} className="h-48 bg-gray-200 rounded-lg animate-pulse"></div>
+              <div
+                key={idx}
+                className="h-48 bg-gray-200 rounded-lg animate-pulse"
+              ></div>
             ))
           ) : paginatedList.length > 0 ? (
             paginatedList.map((vocab, idx) => (

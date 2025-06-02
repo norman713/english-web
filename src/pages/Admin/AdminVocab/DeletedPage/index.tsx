@@ -5,7 +5,7 @@ import VocabSetCard from "../../../../components/VocabSetCard";
 import { useNavigate } from "react-router-dom";
 import setApi, { VocabSet } from "../../../../api/setApi";
 import Pagination from "../../../../components/Pagination";
-import { ArrowLeftCircle } from "lucide-react"; // chỉ để có nút “Quay lại”
+import { ArrowLeftCircle } from "lucide-react";
 
 const DeletedPage: React.FC = () => {
   const navigate = useNavigate();
@@ -77,9 +77,7 @@ const DeletedPage: React.FC = () => {
             >
               <ArrowLeftCircle size={24} />
             </button>
-            <h2 className="text-3xl font-bold text-blue-900">
-              Bộ từ đã xóa
-            </h2>
+            <h2 className="text-3xl font-bold text-blue-900">Bộ từ đã xóa</h2>
           </div>
 
           {/* Search */}

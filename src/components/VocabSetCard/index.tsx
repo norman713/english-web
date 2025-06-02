@@ -16,9 +16,9 @@ interface VocabSetCardProps {
   wordsCount: number;
   learnedWords?: number;
   isDeleted?: boolean;
-  version?: string;            // Chỉ dùng ở Admin
+  version?: string; // Chỉ dùng ở Admin
   searchQuery?: string;
-  isAdmin?: boolean;           // Quyền Admin (mặc định false)
+  isAdmin?: boolean; // Quyền Admin (mặc định false)
   onDelete?: (id: string) => void;
   onRestore?: (id: string) => void;
   onDetailClick?: (id: string) => void;
@@ -36,7 +36,8 @@ const VocabSetCard: React.FC<VocabSetCardProps> = ({
   onRestore,
   onDetailClick,
 }) => {
-  const isCompleted = !isDeleted && wordsCount > 0 && learnedWords >= wordsCount;
+  const isCompleted =
+    !isDeleted && wordsCount > 0 && learnedWords >= wordsCount;
 
   // Background tùy theo isDeleted
   const cardBgClass = isDeleted ? "bg-red-100" : "bg-blue-100";
@@ -148,9 +149,7 @@ const VocabSetCard: React.FC<VocabSetCardProps> = ({
 
       {/* Số từ đã học*/}
       <div className="flex items-center gap-2 text-[20px] text-gray-500 mb-4 font-bold">
-        <span>
-          {wordsCount} từ
-        </span>
+        <span>{wordsCount} từ</span>
       </div>
 
       {/* Chỉ hiển thị Phiên bản khi có prop version */}

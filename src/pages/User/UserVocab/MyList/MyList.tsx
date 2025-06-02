@@ -2,10 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import VocabSetCard from "../../../../components/VocabSetCard";
-import savedSetApi, { SavedSetsState, SavedSetItem } from "../../../../api/savedSetApi";
+import savedSetApi, {
+  SavedSetsState,
+  SavedSetItem,
+} from "../../../../api/savedSetApi";
 import StatusTab from "../../../../components/StatusTab";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../../../../components/Pagination";
+import UserVocabTab from "../../../../components/UserVocabSet";
 
 interface VocabSetForCard {
   id: string;
@@ -42,7 +46,8 @@ const MyList: React.FC = () => {
         setStats(data);
       } catch (err: unknown) {
         console.error("Lỗi khi lấy saved-sets state:", err);
-        const message = err instanceof Error ? err.message : "Lỗi không xác định";
+        const message =
+          err instanceof Error ? err.message : "Lỗi không xác định";
         setErrorStats(message);
       } finally {
         setIsLoadingStats(false);
@@ -68,7 +73,8 @@ const MyList: React.FC = () => {
         setVocabList(mappedList);
       } catch (err: unknown) {
         console.error("Lỗi khi lấy danh sách saved sets:", err);
-        const message = err instanceof Error ? err.message : "Lỗi không xác định";
+        const message =
+          err instanceof Error ? err.message : "Lỗi không xác định";
         setErrorList(message);
         setVocabList([]);
       } finally {
@@ -94,9 +100,21 @@ const MyList: React.FC = () => {
         <div className="flex justify-center items-center gap-[70px] py-[30px] bg-white">
           {isLoadingStats ? (
             <>
-              <StatusTab number={0} text="đang tải..." backgroundColor="bg-gray-100" />
-              <StatusTab number={0} text="đang tải..." backgroundColor="bg-gray-100" />
-              <StatusTab number={0} text="đang tải..." backgroundColor="bg-gray-100" />
+              <StatusTab
+                number={0}
+                text="đang tải..."
+                backgroundColor="bg-gray-100"
+              />
+              <StatusTab
+                number={0}
+                text="đang tải..."
+                backgroundColor="bg-gray-100"
+              />
+              <StatusTab
+                number={0}
+                text="đang tải..."
+                backgroundColor="bg-gray-100"
+              />
             </>
           ) : errorStats ? (
             <>
@@ -129,7 +147,9 @@ const MyList: React.FC = () => {
 
         {/* Thanh công cụ Search */}
         <div className="top-vocab p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <h2 className="text-3xl font-bold text-blue-900">Danh sách từ của tôi</h2>
+          <h2 className="text-3xl font-bold text-blue-900">
+            Danh sách từ của tôi
+          </h2>
           <div className="search-container flex items-center border border-blue-300 rounded px-2 w-[373px] bg-white">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -160,6 +180,19 @@ const MyList: React.FC = () => {
 
         {/* Danh sách VocabSetCard hoặc lỗi nếu có */}
         <div className="vocab-list p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mx-10">
+          {/* test user vocab */}
+          <UserVocabTab
+            title="Từ vựng chủ đề giao tiếp hằng ngày"
+            wordsCount={200}
+            learnedWords={0}
+            isDeleted={false}
+            isCompleted={false}
+            isFavorited={true}
+            onDetailClick={() => console.log("Chi tiết clicked")}
+            onStartLearning={() => console.log("Học tiếp clicked")}
+            onAddFavorite={() => console.log("Thêm vào yêu thích!")}
+          />
+
           {isLoadingList ? (
             Array.from({ length: itemsPerPage }).map((_, idx) => (
               <div
@@ -168,7 +201,9 @@ const MyList: React.FC = () => {
               />
             ))
           ) : errorList ? (
-            <p className="text-center text-red-500 col-span-full">{errorList}</p>
+            <p className="text-center text-red-500 col-span-full">
+              {errorList}
+            </p>
           ) : paginatedList.length > 0 ? (
             paginatedList.map((vocab) => (
               <VocabSetCard
