@@ -1,92 +1,86 @@
-import { useState } from "react";
+// src/pages/Admin/Test/UserTestPage.tsx
+import React, { useState, useEffect } from "react";
 import Pagination from "../../../../components/Pagination";
 import { useNavigate } from "react-router-dom";
+import testApi, { TestItem as RawTestItem } from "../../../../api/testApi";
 
-const UserTestPage = () => {
+// Định nghĩa lại kiểu local để hiển thị (tương tự như mảng cứng trước đây)
+interface DisplayTestItem {
+  id: string;           // Lấy từ RawTestItem.id
+  title: string;        // RawTestItem.name
+  questionNumber: number; // RawTestItem.questionCount
+  testTime: string;     // RawTestItem.minutes + " phút"
+  testType: string;     // RawTestItem.topic
+}
+
+const UserTestPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
   const navigate = useNavigate();
 
-  // Dữ liệu demo cho các bài kiểm tra
-  const testList = [
-    {
-      id: 1,
-      title: "2024 Toeic Test",
-      questionNumber: 200,
-      testTime: "120 phút",
-      testType: "Toeic",
-    },
-    {
-      id: 2,
-      title: "IELTS Practice Test",
-      questionNumber: 150,
-      testTime: "90 phút",
-      testType: "IELTS",
-    },
-    {
-      id: 3,
-      title: "TOEFL Mock Test",
-      questionNumber: 100,
-      testTime: "60 phút",
-      testType: "TOEFL",
-    },
-    {
-      id: 4,
-      title: "TOEFL Mock Test",
-      questionNumber: 100,
-      testTime: "60 phút",
-      testType: "TOEFL",
-    },
-    {
-      id: 5,
-      title: "TOEFL Mock Test",
-      questionNumber: 100,
-      testTime: "60 phút",
-      testType: "TOEFL",
-    },
-    {
-      id: 6,
-      title: "TOEFL Mock Test",
-      questionNumber: 100,
-      testTime: "60 phút",
-      testType: "TOEFL",
-    },
-    {
-      id: 7,
-      title: "TOEFL Mock Test",
-      questionNumber: 100,
-      testTime: "60 phút",
-      testType: "TOEFL",
-    },
-    {
-      id: 8,
-      title: "TOEFL Mock Test",
-      questionNumber: 100,
-      testTime: "60 phút",
-      testType: "TOEFL",
-    },
-  ];
+  // State chứa danh sách đề thi tải về từ API
+  const [testList, setTestList] = useState<DisplayTestItem[]>([]);
+  // State để theo dõi đang loading hay đã xong
+  const [loading, setLoading] = useState(true);
 
-  // Lọc theo search
+  // 1. Khi component mount, gọi API lấy về tất cả đề thi (page=1, size lớn)
+  useEffect(() => {
+    const fetchAllTests = async () => {
+      try {
+        // Giả sử server có khoảng <10000 đề, gọi page=1 & size=10000
+        const response = await testApi.getAll(1, 10000);
+        // response.tests: RawTestItem[]
+        const mapped: DisplayTestItem[] = response.tests.map(
+          (item: RawTestItem) => ({
+            id: item.id,
+            title: item.name,
+            questionNumber: item.questionCount,
+            testTime: `${item.minutes} phút`,
+            testType: item.topic,
+          })
+        );
+        setTestList(mapped);
+      } catch (error) {
+        console.error("Lỗi khi tải danh sách đề thi:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllTests();
+  }, []);
+
+  // 2. Lọc theo searchQuery (giữ nguyên logic cũ)
   const filteredTests = testList.filter((test) =>
     test.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Tính phần tử hiển thị theo trang hiện tại
+  // 3. Tính phân trang
   const lastIndex = currentPage * itemsPerPage;
   const firstIndex = lastIndex - itemsPerPage;
   const currentTests = filteredTests.slice(firstIndex, lastIndex);
 
-  // Xử lý đổi trang
+  // 4. Xử lý đổi trang
   const onPageChange = (page: number) => {
     if (page < 1 || page > Math.ceil(filteredTests.length / itemsPerPage))
       return;
     setCurrentPage(page);
   };
-  const handleDetailClick = (id: number) => {
-    navigate(`/user/test/overall/${id}`); // Điều hướng đến trang chi tiết theo id
+
+  // 5. Khi bấm “Chi tiết”, chuyển tới trang chi tiết với id
+  const handleDetailClick = (id: string) => {
+    navigate(`/user/test/overall/${id}`);
   };
+
+  // 6. Nếu loading, hiển thị placeholder
+  if (loading) {
+    return (
+      <div className="test-container">
+        <div className="p-8 text-center text-gray-500">Đang tải đề thi…</div>
+      </div>
+    );
+  }
 
   return (
     <div className="test-container">
@@ -116,7 +110,7 @@ const UserTestPage = () => {
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
-                setCurrentPage(1); // Reset về trang 1 khi search thay đổi
+                setCurrentPage(1); // khi search đổi, reset trang về 1
               }}
               className="w-full p-2 outline-none"
             />
@@ -125,9 +119,9 @@ const UserTestPage = () => {
 
         {/* Test List */}
         <div className="test-list p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mx-10">
-          {currentTests.map((test, index) => (
+          {currentTests.map((test) => (
             <div
-              key={index}
+              key={test.id}
               className="test-item p-4 rounded bg-[rgba(99,176,239,0.23)]"
             >
               <h3 className="test-title font-bold text-2xl">{test.title}</h3>
@@ -151,16 +145,25 @@ const UserTestPage = () => {
               </div>
             </div>
           ))}
+
+          {/* Nếu không tìm thấy kết quả nào */}
+          {filteredTests.length === 0 && (
+            <div className="col-span-full text-center text-gray-500">
+              Không tìm thấy đề thi phù hợp.
+            </div>
+          )}
         </div>
 
         {/* Pagination */}
-        <Pagination
-          totalItems={filteredTests.length}
-          itemsPerPage={itemsPerPage}
-          currentPage={currentPage}
-          onPageChange={onPageChange}
-          siblingCount={1} // có thể tùy chỉnh
-        />
+        {filteredTests.length > itemsPerPage && (
+          <Pagination
+            totalItems={filteredTests.length}
+            itemsPerPage={itemsPerPage}
+            currentPage={currentPage}
+            onPageChange={onPageChange}
+            siblingCount={1} // có thể điều chỉnh nếu muốn
+          />
+        )}
       </div>
     </div>
   );
