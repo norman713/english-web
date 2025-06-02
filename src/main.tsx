@@ -98,7 +98,7 @@ createRoot(document.getElementById("root")!).render(
             <Route index element={<AdminTestPage />} />
             <Route path=":id" element={<TestDetailPage />} />{" "}
             <Route path="add-test" element={<AddTestPage />} />
-            <Route path="deleted" element={<DeleteTestPage />} />
+            <Route path="deleted-page" element={<DeleteTestPage />} />
           </Route>
           <Route path="statistic" element={<AdminStatisticPage />} />
           <Route path="user" element={<UserDetailsPage />} />

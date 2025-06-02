@@ -45,7 +45,7 @@ const ForgotPasswordPage = () => {
               className="w-full bg-indigo-400 text-white rounded-full py-2 text-sm font-semibold hover:bg-indigo-500 transition-colors"
               onClick={() => navigate("/reset")}
             >
-              Send Reset Link
+              Send Reset Code
             </button>
           </form>
         )}

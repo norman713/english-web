@@ -1,22 +1,23 @@
+// src/pages/Admin/AdminTest/AddTestPage.tsx
+
 import React, { useState, useEffect } from "react";
 import { FaEdit, FaTrash, FaSave, FaTimes, FaPlus } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import testApi from "../../../../api/testApi";
 
-// Định nghĩa câu hỏi
+// Định nghĩa câu hỏi và lựa chọn
 type Option = { id: string; text: string };
 type Question = { id: number; question: string; options: Option[] };
 
-// Định nghĩa phần
+// Định nghĩa phần (Part)
 type PartData = {
   description: string;
   questions: Question[];
 };
+// Kiểu cho toàn bộ partsData (key là tên Part)
+type PartsData = { [key: string]: PartData };
 
-// Định nghĩa toàn bộ partsData
-type PartsData = {
-  [key: string]: PartData;
-};
-
-// Dữ liệu ban đầu trống cho 3 phần
+// Khởi tạo dữ liệu trống cho 3 phần
 const initialPartsData: PartsData = {
   "Part 1": { description: "", questions: [] },
   "Part 2": { description: "", questions: [] },
@@ -24,38 +25,39 @@ const initialPartsData: PartsData = {
 };
 
 const AddTestPage: React.FC = () => {
+  const navigate = useNavigate();
+
   // Tab tạo bộ đề: 'create' hoặc 'upload'
   const [mode, setMode] = useState<"create" | "upload">("create");
-
+  // Danh sách tên các phần
   const parts = Object.keys(initialPartsData);
+  // Phần đang active (mặc định Part 1)
   const [activePart, setActivePart] = useState<string>(parts[0]);
 
-  // State quản lý thông tin test do user nhập
+  // Thông tin chung của test
   const [testTitle, setTestTitle] = useState("");
   const [testTime, setTestTime] = useState("");
   const [testType, setTestType] = useState("");
 
-  // State quản lý dữ liệu theo phần
+  // Dữ liệu các phần
   const [partsData, setPartsData] = useState<PartsData>(initialPartsData);
 
-  // State edit mô tả phần
+  // Trạng thái chỉnh sửa mô tả
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [descriptionDraft, setDescriptionDraft] = useState("");
 
-  // State edit câu hỏi
-  const [editingQuestionId, setEditingQuestionId] = useState<number | null>(
-    null
-  );
+  // Trạng thái chỉnh sửa câu hỏi
+  const [editingQuestionId, setEditingQuestionId] = useState<number | null>(null);
   const [questionDraft, setQuestionDraft] = useState("");
 
-  // State edit lựa chọn
-  const [editingOption, setEditingOption] = useState<{
-    questionId: number;
-    optionId: string;
-  } | null>(null);
+  // Trạng thái chỉnh sửa lựa chọn
+  const [editingOption, setEditingOption] = useState<{ questionId: number; optionId: string } | null>(null);
   const [optionDraft, setOptionDraft] = useState("");
 
-  // Khi activePart hoặc partsData thay đổi, cập nhật draft mô tả
+  // Trạng thái submit
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Khi activePart hoặc partsData thay đổi, reset draft và các trạng thái edit
   useEffect(() => {
     setDescriptionDraft(partsData[activePart].description);
     setIsEditingDescription(false);
@@ -63,7 +65,7 @@ const AddTestPage: React.FC = () => {
     setEditingOption(null);
   }, [activePart, partsData]);
 
-  // Lưu mô tả
+  // Lưu mô tả của phần đang active
   const saveDescription = () => {
     setPartsData((prev) => ({
       ...prev,
@@ -75,15 +77,13 @@ const AddTestPage: React.FC = () => {
     setIsEditingDescription(false);
   };
 
-  // Xóa câu hỏi có confirm
+  // Xóa câu hỏi (soft) khỏi phần hiện tại
   const deleteQuestion = (questionId: number) => {
     const confirmed = window.confirm("Bạn có chắc muốn xóa câu hỏi này không?");
     if (!confirmed) return;
 
     setPartsData((prev) => {
-      const updatedQuestions = prev[activePart].questions.filter(
-        (q) => q.id !== questionId
-      );
+      const updatedQuestions = prev[activePart].questions.filter((q) => q.id !== questionId);
       return {
         ...prev,
         [activePart]: {
@@ -95,7 +95,7 @@ const AddTestPage: React.FC = () => {
     if (editingQuestionId === questionId) setEditingQuestionId(null);
   };
 
-  // Lưu chỉnh sửa câu hỏi
+  // Lưu chỉnh sửa nội dung câu hỏi
   const saveQuestion = (questionId: number) => {
     setPartsData((prev) => {
       const updatedQuestions = prev[activePart].questions.map((q) =>
@@ -112,7 +112,7 @@ const AddTestPage: React.FC = () => {
     setEditingQuestionId(null);
   };
 
-  // Lưu chỉnh sửa lựa chọn
+  // Lưu chỉnh sửa nội dung lựa chọn
   const saveOption = (questionId: number, optionId: string) => {
     setPartsData((prev) => {
       const updatedQuestions = prev[activePart].questions.map((q) => {
@@ -137,12 +137,61 @@ const AddTestPage: React.FC = () => {
     setEditingOption(null);
   };
 
-  // Xử lý upload file pdf (placeholder, anh/chị cần implement thêm xử lý thật)
+  // Xử lý upload file PDF (chỉ placeholder)
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     alert(`Đã chọn file: ${file.name}. Tính năng đọc file cần implement thêm.`);
     // TODO: Thêm logic đọc file PDF, parse nội dung, cập nhật partsData tương ứng
+  };
+
+  // Xử lý submit tạo mới test
+  const handleSubmit = async () => {
+    // Validate thông tin chung
+    if (!testTitle || !testTime || !testType) {
+      alert("Vui lòng nhập đầy đủ thông tin tên đề, thời gian, chủ đề.");
+      return;
+    }
+    const minutes = parseInt(testTime, 10);
+    if (isNaN(minutes) || minutes <= 0) {
+      alert("Thời gian làm bài phải là số nguyên dương!");
+      return;
+    }
+
+    // Chuyển partsData về format backend yêu cầu
+    const partsArray = Object.entries(partsData).map(([partName, data]) => ({
+      content: data.description || partName, // Nếu chưa nhập mô tả, lấy tên part
+      questions: data.questions.map((q) => ({
+        content: q.question,
+        answers: q.options.map((opt) => opt.text),
+        correctAnswer: q.options[0]?.text || "", // Mặc định đáp án đúng là đáp án đầu (có thể mở rộng)
+        explanation: "",
+      })),
+    }));
+
+    // Kiểm tra ít nhất phải có 1 câu hỏi
+    if (partsArray.every((p) => p.questions.length === 0)) {
+      alert("Mỗi đề phải có ít nhất 1 câu hỏi.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        name: testTitle,
+        minutes,
+        topic: testType,
+        parts: partsArray,
+      };
+      const res = await testApi.createTest(payload);
+      alert("Tạo bộ đề thành công!");
+      navigate(`/admin/test/${res.id}`);
+    } catch (err) {
+      alert("Tạo bộ đề thất bại. Vui lòng kiểm tra lại dữ liệu!");
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -153,9 +202,7 @@ const AddTestPage: React.FC = () => {
       <div className="max-w-[900px] mx-auto flex gap-3 mb-6">
         <button
           className={`px-4 py-2 rounded-full font-semibold cursor-pointer ${
-            mode === "create"
-              ? "bg-blue-400 text-white"
-              : "bg-blue-100 text-blue-700"
+            mode === "create" ? "bg-blue-400 text-white" : "bg-blue-100 text-blue-700"
           }`}
           onClick={() => setMode("create")}
           type="button"
@@ -164,9 +211,7 @@ const AddTestPage: React.FC = () => {
         </button>
         <button
           className={`px-4 py-2 rounded-full font-semibold cursor-pointer ${
-            mode === "upload"
-              ? "bg-blue-400 text-white"
-              : "bg-blue-100 text-blue-700"
+            mode === "upload" ? "bg-blue-400 text-white" : "bg-blue-100 text-blue-700"
           }`}
           onClick={() => setMode("upload")}
           type="button"
@@ -190,7 +235,7 @@ const AddTestPage: React.FC = () => {
               type="text"
               value={testTime}
               onChange={(e) => setTestTime(e.target.value)}
-              placeholder="Nhập thời gian làm bài"
+              placeholder="Nhập thời gian làm bài (phút)"
               className="w-full p-2 rounded-full border border-gray-400 bg-[#EEF5FF]"
             />
             <input
@@ -213,13 +258,14 @@ const AddTestPage: React.FC = () => {
                     : "bg-blue-100 text-blue-400"
                 }`}
                 onClick={() => setActivePart(part)}
+                type="button"
               >
                 {part}
               </button>
             ))}
           </div>
 
-          {/* Mô tả phần (Part 2 và 3 mới có) */}
+          {/* Mô tả phần (Part 2, 3 mới có mô tả) */}
           {(activePart === "Part 2" || activePart === "Part 3") && (
             <div className="max-w-[900px] mx-auto bg-[#EEF5FF] p-4 rounded border border-gray-300 whitespace-pre-line mb-6 relative">
               {partsData[activePart].description || isEditingDescription ? (
@@ -230,12 +276,11 @@ const AddTestPage: React.FC = () => {
                         <button
                           onClick={() => {
                             setIsEditingDescription(true);
-                            setDescriptionDraft(
-                              partsData[activePart].description
-                            );
+                            setDescriptionDraft(partsData[activePart].description);
                           }}
                           className="text-[#71869D] hover:text-blue-800"
                           title="Chỉnh sửa mô tả"
+                          type="button"
                         >
                           <FaEdit />
                         </button>
@@ -256,6 +301,7 @@ const AddTestPage: React.FC = () => {
                           }}
                           className="text-red-600 hover:text-red-800"
                           title="Xóa đoạn văn"
+                          type="button"
                         >
                           <FaTrash />
                         </button>
@@ -276,12 +322,14 @@ const AddTestPage: React.FC = () => {
                         <button
                           onClick={saveDescription}
                           className="px-4 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                          type="button"
                         >
                           <FaSave /> Lưu
                         </button>
                         <button
                           onClick={() => setIsEditingDescription(false)}
                           className="px-4 py-1 bg-gray-300 rounded hover:bg-gray-400"
+                          type="button"
                         >
                           <FaTimes /> Hủy
                         </button>
@@ -307,7 +355,7 @@ const AddTestPage: React.FC = () => {
             </div>
           )}
 
-          {/* Danh sách câu hỏi */}
+          {/* Danh sách câu hỏi của phần đang active */}
           <div className="max-w-[900px] mx-auto space-y-4">
             {partsData[activePart].questions.map((q, index) => (
               <div
@@ -327,6 +375,7 @@ const AddTestPage: React.FC = () => {
                         onClick={() => saveQuestion(q.id)}
                         className="text-green-600 hover:text-green-800 mr-2"
                         title="Lưu câu hỏi"
+                        type="button"
                       >
                         <FaSave />
                       </button>
@@ -334,6 +383,7 @@ const AddTestPage: React.FC = () => {
                         onClick={() => setEditingQuestionId(null)}
                         className="text-gray-500 hover:text-gray-800"
                         title="Hủy chỉnh sửa"
+                        type="button"
                       >
                         <FaTimes />
                       </button>
@@ -368,16 +418,14 @@ const AddTestPage: React.FC = () => {
                   )}
                 </div>
 
-                {/* Lựa chọn */}
+                {/* Lưu từng lựa chọn */}
                 <ul className="list-disc list-inside space-y-1">
                   {q.options.map((opt) =>
                     editingOption &&
                     editingOption.questionId === q.id &&
                     editingOption.optionId === opt.id ? (
                       <li key={opt.id} className="flex items-center gap-2">
-                        <span className="font-bold">
-                          {opt.id.toUpperCase()}.
-                        </span>
+                        <span className="font-bold">{opt.id.toUpperCase()}.</span>
                         <input
                           type="text"
                           value={optionDraft}
@@ -412,10 +460,7 @@ const AddTestPage: React.FC = () => {
                         <div>
                           <button
                             onClick={() => {
-                              setEditingOption({
-                                questionId: q.id,
-                                optionId: opt.id,
-                              });
+                              setEditingOption({ questionId: q.id, optionId: opt.id });
                               setOptionDraft(opt.text);
                             }}
                             className="text-[#71869D] hover:underline"
@@ -432,7 +477,7 @@ const AddTestPage: React.FC = () => {
               </div>
             ))}
 
-            {/* Nút thêm câu */}
+            {/* Nút thêm câu hỏi mới */}
             <button
               className="bg-[#9FFFA7] text-[#000000] gap-3 px-4 py-2 font-bold rounded inline-flex items-center hover:bg-green-500 mt-4"
               type="button"
@@ -440,9 +485,7 @@ const AddTestPage: React.FC = () => {
                 setPartsData((prev) => {
                   const newQuestionId =
                     prev[activePart].questions.length > 0
-                      ? Math.max(
-                          ...prev[activePart].questions.map((q) => q.id)
-                        ) + 1
+                      ? Math.max(...prev[activePart].questions.map((q) => q.id)) + 1
                       : 1;
                   const newQuestion: Question = {
                     id: newQuestionId,
@@ -501,12 +544,10 @@ const AddTestPage: React.FC = () => {
         <button
           type="button"
           className="w-full bg-[#9FDAFF] hover:bg-blue-400 rounded-full py-3 px-6 flex justify-center items-center gap-3 font-bold text-black"
-          onClick={() => {
-            alert("Đã xác nhận!");
-            // Thêm xử lý gửi data lên server hoặc lưu local tại đây
-          }}
+          disabled={isSubmitting}
+          onClick={handleSubmit}
         >
-          <span>Xác nhận</span>
+          <span>{isSubmitting ? "Đang tạo..." : "Xác nhận"}</span>
         </button>
       </div>
     </div>

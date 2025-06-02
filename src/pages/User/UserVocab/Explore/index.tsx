@@ -64,7 +64,7 @@ const Explore: React.FC = () => {
 
         {/* Thanh công cụ */}
         <div className="top-vocab p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <h2 className="text-3xl font-bold text-blue-900">Danh sách từ của tôi</h2>
+          <h2 className="text-3xl font-bold text-blue-900">Danh sách bộ từ</h2>
           <div className="search-container flex items-center border border-blue-300 rounded px-2 w-[373px] bg-white">
             <svg
               xmlns="http://www.w3.org/2000/svg"

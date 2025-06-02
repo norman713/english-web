@@ -191,22 +191,22 @@ const UserTestResultPage = () => {
 
       {/* Tóm tắt kết quả */}
       <div className="mb-6">
-        <div className="text-blue-300 font-semibold text-lg mb-2 text-[25px]">
+        <div className="text-blue-400 font-semibold text-lg mb-2 text-[25px]">
           Tóm tắt kết quả
         </div>
-        <ul className="list-disc list-inside text-gray-400 space-y-1 text-sm font-semibold text[20px] ">
+        <ul className="list-disc list-inside text-gray-600 space-y-1 text-sm font-semibold text[20px] ">
           <li>
             Kết quả làm bài{" "}
-            <span className="text-blue-300">
+            <span className="text-blue-600">
               {correctAnswers}/{totalQuestions}
             </span>
           </li>
           <li>
-            Độ chính xác <span className="text-blue-300">{accuracy}%</span>
+            Độ chính xác <span className="text-blue-600">{accuracy}%</span>
           </li>
           <li>
             Thời gian hoàn thành{" "}
-            <span className="text-blue-300">{timeSpentMinutes} phút</span>
+            <span className="text-blue-600">{timeSpentMinutes} phút</span>
           </li>
         </ul>
       </div>

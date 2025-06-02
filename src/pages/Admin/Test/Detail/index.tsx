@@ -1,12 +1,10 @@
 import React, { useState } from "react";
-import { useParams } from "react-router-dom";
 import {
   FaEdit,
   FaTrash,
   FaSave,
   FaTimes,
   FaPlus,
-  FaCheck,
 } from "react-icons/fa";
 
 // Định nghĩa kiểu cho câu hỏi
@@ -111,7 +109,7 @@ Different content and questions for Part 3.`,
 };
 
 const TestDetailPage: React.FC = () => {
-  const { id } = useParams();
+
   const parts = Object.keys(initialPartsData);
   const [activePart, setActivePart] = useState<string>(parts[0]);
 
@@ -241,7 +239,7 @@ const TestDetailPage: React.FC = () => {
   return (
     <div className="w-full p-3">
       <h1 className="text-2xl font-bold text-[#31373F] mb-6">
-        Chi tiết bộ đề thi <span className="text-blue-600">ID: {id}</span>
+        Chi tiết bộ đề thi {testDetail.title}
       </h1>
 
       {/* Thông tin chung bộ đề */}

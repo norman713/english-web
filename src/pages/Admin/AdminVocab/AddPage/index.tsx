@@ -1,84 +1,154 @@
-import { useState } from "react";
+// src/pages/Admin/AdminVocab/AddPage/index.tsx
+
+import React, { useState } from "react";
 import { X, Plus, Edit3 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import setApi from "../../../../api/setApi"; // Thay bằng đường dẫn đúng của bạn
+import setApi from "../../../../api/setApi"; 
 import axios from "axios";
 
 interface VocabularyCard {
-  id: string;
+  // `clientId` chỉ để React xử lý key map; không dùng làm wordId
+  clientId: string;        
   word: string;
   pronunciation: string;
   translation: string;
   example: string;
-  imageUrl: string;
+  // giữ file thực để upload sau
+  file?: File;
 }
 
 const AddPage = () => {
   const navigate = useNavigate();
   const [setName, setSetName] = useState("");
+  // Mỗi card bây giờ chứa `clientId` để React render, và `file` để upload
   const [cards, setCards] = useState<VocabularyCard[]>([
     {
-      id: uuidv4(),
+      clientId: uuidv4(),
       word: "",
       pronunciation: "",
       translation: "",
       example: "",
-      imageUrl: "",
+      file: undefined,
     },
   ]);
 
+  // Thêm thẻ từ mới
   const addCard = () => {
-    setCards([
-      ...cards,
+    setCards((prev) => [
+      ...prev,
       {
-        id: uuidv4(),
+        clientId: uuidv4(),
         word: "",
         pronunciation: "",
         translation: "",
         example: "",
-        imageUrl: "",
+        file: undefined,
       },
     ]);
   };
 
-  const removeCard = (id: string) => {
+  // Xóa thẻ từ
+  const removeCard = (clientId: string) => {
     if (cards.length > 1) {
-      setCards(cards.filter((card) => card.id !== id));
+      setCards((prev) => prev.filter((c) => c.clientId !== clientId));
     } else {
       toast.warning("Bộ từ cần có ít nhất 1 thẻ từ vựng");
     }
   };
 
+  // Cập nhật giá trị text input (word, translation, v.v.)
+  const handleInputChange = (
+    clientId: string,
+    field: keyof VocabularyCard,
+    value: string
+  ) => {
+    setCards((prev) =>
+      prev.map((c) =>
+        c.clientId === clientId ? { ...c, [field]: value } : c
+      )
+    );
+  };
+
+  // Khi người dùng chọn file ảnh, lưu vào `file` của card đó
+  const handleImageSelect = (clientId: string, file: File) => {
+    setCards((prev) =>
+      prev.map((c) =>
+        c.clientId === clientId ? { ...c, file } : c
+      )
+    );
+  };
+
+  // Xử lý “Submit” để:
+  // 1) Tạo bộ từ (tên + từ) → backend tạo ra `setId` và `wordId` cho mỗi từ
+  // 2) Lập lại một lượt fetch các từ trong set vừa tạo, để lấy danh sách `wordId`
+  // 3) Với mỗi wordId, nếu client đã chọn file, gọi uploadWordImage(setId, wordId, file)
   const handleSubmit = async () => {
+    // Validate tên set
     if (!setName.trim()) {
       toast.error("Vui lòng nhập tên bộ từ");
       return;
     }
 
-    if (cards.some((card) => !card.word.trim() || !card.translation.trim())) {
-      toast.error("Vui lòng nhập đầy đủ từ vựng và nghĩa cho tất cả thẻ");
+    // Validate mỗi card có `word` và `translation`
+    if (cards.some((c) => !c.word.trim() || !c.translation.trim())) {
+      toast.error("Vui lòng nhập đầy đủ từ và nghĩa cho tất cả thẻ");
       return;
     }
 
     try {
-      const payload: import("../../../../api/setApi").CreateSetRequest = {
+      // 1) Gọi createSet
+      // Ở đây, chúng ta không gửi imageUrl (server sẽ sinh wordId riêng)
+      const payload = {
         name: setName,
-        words: cards.map((card) => ({
-          word: card.word,
-          pronunciation: card.pronunciation || "",
-          translation: card.translation,
-          example: card.example || "",
-          imageUrl: card.imageUrl || "",
+        // Trường `words` chỉ gồm các field bắt buộc (frontend không gởi imageUrl)
+        words: cards.map((c) => ({
+          word: c.word,
+          pronunciation: c.pronunciation || "",
+          translation: c.translation,
+          example: c.example || "",
         })),
       };
 
-      await setApi.createSet(uuidv4(), payload);
+      const createResp = await setApi.createSet(uuidv4(), payload);
+      const newSetId = createResp.id;
+
+      // 2) Lấy danh sách words vừa tạo trong set (để có wordId từ backend)
+      //    Giả sử backend hỗ trợ getWordsBySetId(setId, page, size)
+      //    và trả về shape { words: Array<{id, position, word, ...}>, totalItems, totalPages }
+      const wordsData = await setApi.getWordsBySetId(newSetId, 1, cards.length);
+
+      // Tạo map: từ text → wordId. Nếu có trùng nghĩa hoặc trùng từ, chúng ta so sánh bằng position
+      // wordsData.words trả về mảng có thứ tự position; client cũng đã map card theo index
+      // => ta giả định thứ tự frontend = thứ tự backend
+      const backendWords = wordsData.words; // kiểu: Array<{id, position, word, ...}>
+
+      // 3) Với mỗi card, nếu người dùng đã chọn file, gọi uploadWordImage
+      await Promise.all(
+  cards.map(async (c, idx) => {
+    if (c.file) {
+      const maybeId = backendWords[idx].id;
+      if (!maybeId) {
+        console.warn(`Không tìm thấy wordId cho từ index=${idx}, bỏ qua upload`);
+        return;
+      }
+      try {
+        await setApi.uploadWordImage(newSetId, maybeId, c.file);
+      } catch (uploadErr) {
+        console.error(`Lỗi upload ảnh cho wordId=${maybeId}:`, uploadErr);
+        toast.warning(
+          `Không upload được ảnh cho từ "${c.word}". Vui lòng thử lại.`
+        );
+      }
+    }
+  })
+);
+
 
       toast.success("Tạo bộ từ thành công!");
-      setTimeout(() => navigate("/admin/admin-vocab/list-page"), 100);
+      setTimeout(() => navigate("/admin/admin-vocab/list-page"), 200);
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         toast.error(err.response?.data?.message || "Có lỗi xảy ra khi tạo bộ từ");
@@ -86,28 +156,6 @@ const AddPage = () => {
         toast.error("Lỗi không xác định");
       }
     }
-  };
-
-  const handleInputChange = (
-    index: number,
-    field: keyof VocabularyCard,
-    value: string
-  ) => {
-    const updatedCards = [...cards];
-    updatedCards[index][field] = value;
-    setCards(updatedCards);
-  };
-
-  const handleImageUpload = (index: number, file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const updatedCards = [...cards];
-      if (e.target?.result) {
-        updatedCards[index].imageUrl = e.target.result as string;
-        setCards(updatedCards);
-      }
-    };
-    reader.readAsDataURL(file);
   };
 
   return (
@@ -146,13 +194,13 @@ const AddPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {cards.map((card, index) => (
               <div
-                key={card.id}
+                key={card.clientId}
                 className="border border-gray-200 rounded-xl shadow-sm bg-white hover:shadow-md transition-shadow"
               >
                 <div className="flex justify-between items-center p-3 border-b bg-gray-50">
                   <span className="text-sm font-medium text-gray-500">Thẻ {index + 1}</span>
                   <button
-                    onClick={() => removeCard(card.id)}
+                    onClick={() => removeCard(card.clientId)}
                     className="text-gray-400 hover:text-red-500 transition"
                   >
                     <X size={18} />
@@ -160,13 +208,13 @@ const AddPage = () => {
                 </div>
 
                 <div className="p-4 space-y-4">
-                  {/* Upload ảnh */}
+                  {/* Ảnh: người dùng chọn file */}
                   <div className="relative h-40 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                    {card.imageUrl ? (
+                    {card.file ? (
                       <img
-                        src={card.imageUrl}
+                        src={URL.createObjectURL(card.file)}
                         alt="Preview"
-                        className="h-full w-full object-contain rounded-lg absolute inset-0 "
+                        className="h-full w-full object-contain rounded-lg absolute inset-0"
                       />
                     ) : (
                       <div className="text-center p-4">
@@ -178,10 +226,11 @@ const AddPage = () => {
                           type="file"
                           accept="image/*"
                           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                          onChange={(e) =>
-                            e.target.files?.[0] &&
-                            handleImageUpload(index, e.target.files[0])
-                          }
+                          onChange={(e) => {
+                            if (e.target.files?.[0]) {
+                              handleImageSelect(card.clientId, e.target.files[0]);
+                            }
+                          }}
                         />
                       </div>
                     )}
@@ -197,7 +246,9 @@ const AddPage = () => {
                         type="text"
                         placeholder="Nhập từ vựng"
                         value={card.word}
-                        onChange={(e) => handleInputChange(index, "word", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange(card.clientId, "word", e.target.value)
+                        }
                         className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                       />
                       <button className="absolute right-2 top-2 text-gray-400 hover:text-blue-500">
@@ -215,7 +266,9 @@ const AddPage = () => {
                       type="text"
                       placeholder="Nhập phiên âm"
                       value={card.pronunciation}
-                      onChange={(e) => handleInputChange(index, "pronunciation", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange(card.clientId, "pronunciation", e.target.value)
+                      }
                       className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
@@ -229,7 +282,9 @@ const AddPage = () => {
                       type="text"
                       placeholder="Nhập nghĩa"
                       value={card.translation}
-                      onChange={(e) => handleInputChange(index, "translation", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange(card.clientId, "translation", e.target.value)
+                      }
                       className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
@@ -244,7 +299,9 @@ const AddPage = () => {
                         type="text"
                         placeholder="Nhập ví dụ"
                         value={card.example}
-                        onChange={(e) => handleInputChange(index, "example", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange(card.clientId, "example", e.target.value)
+                        }
                         className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                       />
                       <button className="absolute right-2 top-2 text-gray-400 hover:text-blue-500">

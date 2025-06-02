@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import VocabSetCard from "../../../../components/VocabSetCard";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import setApi, { VocabSet } from "../../../../api/setApi";
 import Pagination from "../../../../components/Pagination";
@@ -17,7 +17,7 @@ const ListPage: React.FC = () => {
 
   const itemsPerPage = 8;
 
-  // Lần đầu fetch toàn bộ set chưa xóa (size=9999 để client-side paging)
+  // 1. Fetch toàn bộ set chưa xóa
   useEffect(() => {
     const fetchVocabSets = async () => {
       setIsLoading(true);
@@ -38,26 +38,25 @@ const ListPage: React.FC = () => {
     fetchVocabSets();
   }, []);
 
-  // Lọc theo searchQuery
+  // 2. Lọc theo searchQuery
   const filteredList = vocabList.filter((v) =>
     v.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Tính tổng trang
+  // 3. Tính tổng trang + danh sách page hiện tại
   const totalItems = filteredList.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
-
-  // Lấy danh sách để hiển thị ở trang hiện tại
   const paginatedList = filteredList.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
+  // 4. Điều hướng tới trang thêm mới
   const handleAddNew = () => {
     navigate("/admin/admin-vocab/add-page");
   };
 
-  // Xoá mềm (setApi.deleteSet sẽ gắn token Authorization, backend tự biết userId)
+  // 5. Xoá mềm
   const handleDeleteSet = async (id: string) => {
     try {
       await setApi.deleteSet(id);
@@ -83,6 +82,14 @@ const ListPage: React.FC = () => {
             >
               <Plus size={20} />
               <span>Thêm mới</span>
+            </button>
+            {/* Nút điều hướng sang trang Đã xoá */}
+            <button
+              onClick={() => navigate("/admin/admin-vocab/deleted-page")}
+              className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+            >
+              <Trash2 size={20} />
+              <span>Đã xoá</span>
             </button>
           </div>
 
@@ -115,14 +122,15 @@ const ListPage: React.FC = () => {
           </div>
         </div>
 
-        {/* List cards */}
+        {/* Danh sách card */}
         <div className="vocab-list p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mx-10">
           {isLoading ? (
+            // Placeholder khi loading
             [...Array(itemsPerPage)].map((_, index) => (
               <div
                 key={index}
                 className="h-48 bg-gray-200 rounded-lg animate-pulse"
-              ></div>
+              />
             ))
           ) : paginatedList.length > 0 ? (
             paginatedList.map((vocab) => (
@@ -133,8 +141,9 @@ const ListPage: React.FC = () => {
                 wordsCount={vocab.wordCount}
                 version={vocab.version}
                 searchQuery={searchQuery}
-                isDeleted={false}
-                onDelete={handleDeleteSet}
+                isDeleted={false}             // trang này chỉ chứa những set chưa bị xoá
+                isAdmin={true}                // <--- chỉ định quyền Admin
+                onDelete={handleDeleteSet}    // <--- callback xóa
                 onDetailClick={(id) =>
                   navigate(`/admin/admin-vocab/update-page/${id}`)
                 }
@@ -147,7 +156,7 @@ const ListPage: React.FC = () => {
           )}
         </div>
 
-        {/* Pagination */}
+        {/* Phân trang */}
         {!isLoading && totalPages > 1 && (
           <div className="pagination p-4 text-center">
             <Pagination

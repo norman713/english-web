@@ -5,38 +5,10 @@ import logo from "../../assets/logo-removebg-preview (1).png";
 import defaultAvatar from "../../assets/user.png"; // Ảnh mặc định khi không có avatar
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { parseJwt } from "../../utils/jwtHelper"; // hàm parseJwt đã mô tả trước
 
-/**
- * Kiểu đại diện cho các vai trò thực tế trong JWT payload.
- * Nếu không đọc được token, mặc định là 'GUEST'.
- */
+// Kiểu đại diện cho các vai trò
 type RawRole = "ADMIN" | "SYSTEM_ADMIN" | "LEARNER" | "GUEST";
-
-/**
- * Hàm helper: giải mã payload của JWT (base64URL → JSON),
- * trả về Record<string, unknown> thay vì any.
- */
-function parseJwt(token: string): Record<string, unknown> | null {
-  try {
-    const base64Url = token.split(".")[1];
-    const padded =
-      base64Url +
-      "===".slice((base64Url.length + 3) % 4); // thêm padding nếu cần
-    const base64 = padded.replace(/-/g, "+").replace(/_/g, "/");
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split("")
-        .map((c) => {
-          return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-        })
-        .join("")
-    );
-    return JSON.parse(jsonPayload) as Record<string, unknown>;
-  } catch (e) {
-    console.error("Error parsing JWT:", e);
-    return null;
-  }
-}
 
 const NavBar: React.FC = () => {
   const location = useLocation();

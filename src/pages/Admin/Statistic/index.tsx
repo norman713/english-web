@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -64,17 +64,15 @@ const AdminStatisticPage = () => {
 
       {/* Bộ lọc thời gian */}
 
-      <div className="flex justify-center items-center gap-4 mb-6">
+      <div className="flex justify-items-start items-center gap-4 mb-6">
         <select
           className="border rounded px-3 py-2"
           value={selectedRange}
           onChange={(e) => setSelectedRange(e.target.value)}
         >
-          <option value="all">Tất cả</option>
-          <option value="7days">7 ngày gần nhất</option>
-          <option value="30days">30 ngày</option>
-          <option value="60days">60 ngày</option>
-          <option value="1year">1 năm</option>
+          <option value="week">Tuần</option>
+          <option value="month">Tháng</option>
+          <option value="year">Năm</option>
         </select>
         <button className="bg-[#A3C8FF] text-black font-semibold px-4 py-2 rounded hover:bg-blue-500 hover:text-white transition-colors">
           Search
@@ -91,11 +89,11 @@ const AdminStatisticPage = () => {
           <div className="text-gray-600">đề đã thêm</div>
         </div>
         <div className="text-center bg-purple-100 rounded-lg py-6">
-          <div className="text-3xl font-bold">180 phút</div>
+          <div className="text-3xl font-bold">1800</div>
           <div className="text-gray-600">lượt làm đề</div>
         </div>
         <div className="text-center bg-blue-100 rounded-lg py-6">
-          <div className="text-3xl font-bold">75%</div>
+          <div className="text-3xl font-bold">5</div>
           <div className="text-gray-600">bộ từ đã thêm</div>
         </div>
       </div>

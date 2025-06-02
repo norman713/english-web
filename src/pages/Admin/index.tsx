@@ -3,7 +3,7 @@ import Navbar from "../../components/NavBar/NavBar";
 const Admin = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar activeTab={"vocab"} userType={"admin"} />
+      <Navbar />
       <div>
         <Outlet />
       </div>

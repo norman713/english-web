@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MdOutlineDelete } from "react-icons/md";
+import {  RefreshCw } from "lucide-react";
 import Pagination from "../../../../components/Pagination";
 import { useNavigate } from "react-router-dom";
 
@@ -122,13 +122,13 @@ const DeleteTestPage = () => {
           {paginatedTests.map((test, index) => (
             <div
               key={index}
-              className="relative p-4 rounded-xl bg-[#D0E7F6] shadow-md flex flex-col justify-between h-[260px]"
+              className="relative p-4 rounded-xl bg-red-100 shadow-md flex flex-col justify-between h-[260px]"
             >
               <button
                 className="absolute top-2 right-2 text-gray-500 hover:text-red-500"
                 onClick={() => handleDelete(test.id)}
               >
-                <MdOutlineDelete size={30} className="text-[#31373F]" />
+               <RefreshCw size={22} />
               </button>
 
               {/* content of test */}

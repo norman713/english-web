@@ -136,8 +136,8 @@ const LoginPage: React.FC = () => {
         </div>
 
         <div
-          className="text-center font-bold text-[30px] mb-6"
-          style={{ color: "rgba(81, 202, 242, 0.54)" }}
+          className="text-center font-bold text-[30px] mb-6 text-[#4E97EA]"
+     
         >
           Login
         </div>
