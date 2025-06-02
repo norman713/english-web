@@ -5,6 +5,7 @@ import VocabSetCard from "../../../../components/VocabSetCard";
 import setApi from "../../../../api/setApi";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../../../../components/Pagination";
+import UserVocabTab from "../../../../components/UserVocabSet";
 
 interface VocabSet {
   id: string;
@@ -57,22 +58,6 @@ const Explore: React.FC = () => {
     currentPage * itemsPerPage
   );
 
-  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
-
-  const handleAddFavorite = (id: string) => {
-    setFavoriteIds((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(id)) {
-        newSet.delete(id); // Bấm lại thì bỏ yêu thích
-        alert("Đã hủy thêm vào bộ yêu thích!");
-      } else {
-        newSet.add(id); // Thêm yêu thích
-        alert("Đã thêm vào bộ yêu thích!");
-      }
-      return newSet;
-    });
-  };
-
   return (
     <div className="vocab-container">
       <div className="vocab-tab bg-[rgba(169,201,227,0.23)] min-h-screen">
@@ -117,33 +102,16 @@ const Explore: React.FC = () => {
               ></div>
             ))
           ) : paginatedList.length > 0 ? (
-            paginatedList.map((vocab, idx) => {
-              const isFavorited = favoriteIds.has(vocab.id);
-
-              return (
-                <div key={idx} className="flex flex-col">
-                  <VocabSetCard
-                    id={vocab.id}
-                    title={vocab.name}
-                    wordsCount={vocab.wordCount}
-                    searchQuery={searchQuery}
-                    onDetailClick={(id) => navigate(`/user/learn/${id}`)}
-                  />
-                  <button
-                    onClick={() => handleAddFavorite(vocab.id)}
-                    className={`mt-2 py-2 rounded font-medium transition ${
-                      favoriteIds.has(vocab.id)
-                        ? "bg-green-400 text-white hover:bg-green-500"
-                        : "bg-yellow-400 text-black hover:bg-yellow-500"
-                    }`}
-                  >
-                    {favoriteIds.has(vocab.id)
-                      ? "Đã yêu thích"
-                      : "Thêm vào bộ yêu thích"}
-                  </button>
-                </div>
-              );
-            })
+            paginatedList.map((vocab, idx) => (
+              <VocabSetCard
+                key={idx}
+                id={vocab.id}
+                title={vocab.name}
+                wordsCount={vocab.wordCount}
+                searchQuery={searchQuery}
+                onDetailClick={(id) => navigate(`/user/learn/${id}`)}
+              />
+            ))
           ) : (
             <p className="text-center text-gray-500 col-span-full">
               Không tìm thấy danh sách từ vựng nào.

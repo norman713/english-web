@@ -40,7 +40,9 @@ const SignUpPage: React.FC = () => {
       // response: { success: boolean, message: string }
 
       if (response.success) {
-        toast.success(response.message || "Validate thành công. Mã đã được gửi vào email.");
+        toast.success(
+          response.message || "Validate thành công. Mã đã được gửi vào email."
+        );
         setStep("REGISTER");
       } else {
         // backend trả success: false, kèm message
@@ -64,7 +66,12 @@ const SignUpPage: React.FC = () => {
 
   // 3. Bước 2: Register với code (POST /api/auth/register)
   const handleRegister = async () => {
-    if (!name.trim() || !email.trim() || !password.trim() || !verificationCode.trim()) {
+    if (
+      !name.trim() ||
+      !email.trim() ||
+      !password.trim() ||
+      !verificationCode.trim()
+    ) {
       toast.error("Vui lòng điền đầy đủ: tên, email, mật khẩu và mã xác thực.");
       return;
     }
@@ -112,9 +119,11 @@ const SignUpPage: React.FC = () => {
         </div>
 
         {/* Title */}
-        <h2 className="text-center text-blue-500 font-bold text-xl mb-6">Sign Up</h2>
+        <h2 className="text-center text-blue-500 font-bold text-xl mb-6">
+          Sign Up
+        </h2>
 
-        {/* Tên (chỉ cho nhập khi đã bước REGISTER) */}
+        {/* Tên (chỉ cho nhập khi đã xong bước REGISTER) */}
         <div className="relative mb-4">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-black">
             <FaUserFriends />
